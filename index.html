@@ -148,14 +148,14 @@
     /* Floating Bottom Dock */
     #bottom-dock {
       position: fixed;
-      bottom: max(16px, env(safe-area-inset-bottom, 16px));
+      bottom: max(12px, env(safe-area-inset-bottom, 12px));
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       z-index: 20;
-      width: calc(100% - 24px);
+      width: calc(100% - 20px);
       max-width: 580px;
       pointer-events: none;
     }
@@ -170,7 +170,7 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       pointer-events: auto;
     }
 
@@ -178,18 +178,23 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
     }
 
     .dock-group {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       background: rgba(0, 0, 0, 0.35);
       padding: 3px;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.06);
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .dock-group::-webkit-scrollbar {
+      display: none;
     }
 
     .dock-label {
@@ -200,6 +205,7 @@
       color: var(--text-muted);
       padding-left: 6px;
       padding-right: 2px;
+      flex-shrink: 0;
     }
 
     .segment-btn {
@@ -209,15 +215,17 @@
       font-family: inherit;
       font-size: 11px;
       font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 9px;
+      padding: 5px 9px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s ease;
       display: flex;
       align-items: center;
-      gap: 5px;
+      justify-content: center;
       touch-action: manipulation;
       white-space: nowrap;
+      flex: 1;
+      min-width: 52px;
     }
     .segment-btn:hover {
       color: var(--text);
@@ -229,29 +237,31 @@
       box-shadow: 0 2px 8px rgba(0, 240, 255, 0.2);
     }
 
-    /* Palette chips */
+    /* Palette chips row with Tuning Toggle */
     .palette-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, 1fr) auto;
       gap: 5px;
       width: 100%;
+      align-items: center;
     }
 
     .palette-chip {
       background: rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 10px;
-      padding: 6px 6px;
+      padding: 5px 6px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       color: var(--text-muted);
       font-size: 11px;
       font-weight: 600;
       transition: all 0.15s ease;
       touch-action: manipulation;
+      white-space: nowrap;
     }
     .palette-chip:hover {
       border-color: rgba(255, 255, 255, 0.25);
@@ -265,8 +275,8 @@
     }
 
     .color-swatch {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       flex-shrink: 0;
     }
@@ -287,6 +297,149 @@
       box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
     }
 
+    .tuning-toggle-btn {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 10px;
+      padding: 5px 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+      white-space: nowrap;
+    }
+    .tuning-toggle-btn:hover, .tuning-toggle-btn.active {
+      background: rgba(0, 240, 255, 0.22);
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Tuning Panel & Sliders */
+    .tuning-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      overflow: hidden;
+      max-height: 290px;
+      opacity: 1;
+      transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, padding 0.2s ease;
+      padding-top: 5px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .tuning-panel.closed {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      border-top: none;
+      pointer-events: none;
+    }
+    .tuning-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+    }
+    .slider-card {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+    .slider-card.full-width {
+      grid-column: span 2;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    .slider-num {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 600;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 18px;
+      background: transparent;
+      cursor: pointer;
+      touch-action: none;
+    }
+    input[type="range"]:focus {
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 2px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 14px;
+      width: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      margin-top: -5px;
+      transition: transform 0.1s ease;
+    }
+    input[type="range"]:active::-webkit-slider-thumb {
+      transform: scale(1.25);
+    }
+    input[type="range"]::-moz-range-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 2px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      height: 14px;
+      width: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      border: none;
+    }
+    .tuning-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 2px;
+    }
+    .tuning-sub-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+      touch-action: manipulation;
+    }
+    .tuning-sub-btn:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
+
     /* Gesture Hint Toast */
     #gesture-hint {
       align-self: center;
@@ -305,17 +458,35 @@
 
     @media (max-width: 480px) {
       .palette-row {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(4, 1fr) auto;
       }
-      .dock-row {
-        flex-direction: column;
-        align-items: stretch;
+      .tuning-grid {
+        grid-template-columns: 1fr;
       }
-      .dock-group {
-        justify-content: center;
+      .slider-card.full-width {
+        grid-column: span 1;
       }
-      .brand-title {
-        font-size: 11px;
+      .dock-island {
+        padding: 6px 8px;
+        border-radius: 16px;
+      }
+      .segment-btn {
+        padding: 5px 6px;
+        font-size: 10px;
+      }
+      .palette-chip {
+        padding: 5px 4px;
+        font-size: 10px;
+      }
+      .palette-chip span:last-child {
+        display: none;
+      }
+      .palette-chip .color-swatch {
+        margin: 0 2px;
+      }
+      .tuning-toggle-btn {
+        padding: 5px 8px;
+        font-size: 10px;
       }
     }
   </style>
@@ -345,33 +516,105 @@
   <!-- Floating Mobile-Optimized HUD Island -->
   <footer id="bottom-dock">
     <div class="dock-island">
-      <!-- Equation Selection -->
+      <!-- 5 Distinct Fractal Equations -->
       <div class="dock-row">
         <div class="dock-group" style="flex: 1;">
           <span class="dock-label">FORM</span>
-          <button class="segment-btn active" data-eq="0">Mandelbulb</button>
-          <button class="segment-btn" data-eq="1">Mandelbox</button>
+          <button class="segment-btn active" data-eq="0" title="Power-N Mandelbulb">Bulb</button>
+          <button class="segment-btn" data-eq="1" title="Architectural Mandelbox">Box</button>
+          <button class="segment-btn" data-eq="2" title="Brutalist Menger Sponge">Menger</button>
+          <button class="segment-btn" data-eq="3" title="Quaternion Julia 4D">Julia 4D</button>
+          <button class="segment-btn" data-eq="4" title="Sierpinski Polyhedral Gem">KIFS</button>
         </div>
       </div>
 
-      <!-- Color Palettes Grid -->
+      <!-- Color Palettes & Tuning Drawer Toggle -->
       <div class="palette-row">
-        <button class="palette-chip active" data-palette="0">
+        <button class="palette-chip active" data-palette="0" title="Liquid Obsidian & Gold">
           <span class="color-swatch swatch-gold"></span>
           <span>Obsidian</span>
         </button>
-        <button class="palette-chip" data-palette="1">
+        <button class="palette-chip" data-palette="1" title="Deep Neon Cyan">
           <span class="color-swatch swatch-cyan"></span>
-          <span>Neon Cyan</span>
+          <span>Cyan</span>
         </button>
-        <button class="palette-chip" data-palette="2">
+        <button class="palette-chip" data-palette="2" title="Pearlescent Porcelain">
           <span class="color-swatch swatch-porcelain"></span>
           <span>Porcelain</span>
         </button>
-        <button class="palette-chip" data-palette="3">
+        <button class="palette-chip" data-palette="3" title="Crimson Magma">
           <span class="color-swatch swatch-magma"></span>
           <span>Magma</span>
         </button>
+        <button id="btn-toggle-tuning" class="tuning-toggle-btn active" title="Toggle 5 Math & Visual Sliders">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          <span>Tune</span>
+        </button>
+      </div>
+
+      <!-- 5 Interactive Math & Visual Sliders Panel -->
+      <div id="tuning-panel" class="tuning-panel">
+        <div class="tuning-grid">
+          <!-- 1. Morph / Equation Math Parameter -->
+          <div class="slider-card full-width">
+            <div class="slider-header">
+              <span class="slider-name">1. MORPH (FORM PARAMETER)</span>
+              <span id="val-morph" class="slider-num">Power 8.0</span>
+            </div>
+            <input type="range" id="slider-morph" min="3.0" max="12.0" step="0.1" value="8.0">
+          </div>
+
+          <!-- 2. Detail / Max Iterations -->
+          <div class="slider-card">
+            <div class="slider-header">
+              <span class="slider-name">2. DETAIL / ITER</span>
+              <span id="val-detail" class="slider-num">6 iter</span>
+            </div>
+            <input type="range" id="slider-detail" min="4" max="10" step="1" value="6">
+          </div>
+
+          <!-- 3. Glow / Specular Sheen -->
+          <div class="slider-card">
+            <div class="slider-header">
+              <span class="slider-name">3. GLOW / SHEEN</span>
+              <span id="val-glow" class="slider-num">1.5x</span>
+            </div>
+            <input type="range" id="slider-glow" min="0.2" max="3.0" step="0.1" value="1.5">
+          </div>
+
+          <!-- 4. Color Shift / Orbit Phase -->
+          <div class="slider-card">
+            <div class="slider-header">
+              <span class="slider-name">4. COLOR CYCLE</span>
+              <span id="val-color" class="slider-num">+0.00</span>
+            </div>
+            <input type="range" id="slider-color" min="0.0" max="6.28" step="0.05" value="0.0">
+          </div>
+
+          <!-- 5. Shadow / Crevice Contrast -->
+          <div class="slider-card">
+            <div class="slider-header">
+              <span class="slider-name">5. SHADOW / AO</span>
+              <span id="val-shadow" class="slider-num">1.8x</span>
+            </div>
+            <input type="range" id="slider-shadow" min="0.5" max="3.5" step="0.1" value="1.8">
+          </div>
+        </div>
+
+        <div class="tuning-actions">
+          <button id="btn-reset-sliders" class="tuning-sub-btn">Reset Defaults</button>
+          <button id="btn-random-sliders" class="tuning-sub-btn">Randomize Form</button>
+        </div>
       </div>
     </div>
 
@@ -402,13 +645,17 @@
     uniform vec3  u_camTarget;
     uniform float u_fov;
     uniform float u_time;
-    uniform int   u_equation;       // 0: Power-8 Mandelbulb, 1: Architectural Mandelbox
+    uniform int   u_equation;       // 0: Mandelbulb, 1: Mandelbox, 2: Menger, 3: Julia, 4: KIFS
     uniform int   u_palette;        // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Crimson Magma
-    uniform int   u_maxSteps;       // Dynamic raymarching step budget (24 to 64)
-    uniform int   u_maxIter;        // Dynamic fractal iteration budget (6 to 14)
-    uniform int   u_aoTaps;         // Dynamic AO tap count (0 to 3)
+    uniform int   u_maxSteps;       // Dynamic raymarching step budget
+    uniform int   u_maxIter;        // Dynamic fractal iteration budget (4 to 10)
+    uniform int   u_aoTaps;         // Dynamic AO tap count (1 to 3)
     uniform float u_stepMultiplier; // Dynamic step fudge factor (0.70 to 0.95)
-    uniform float u_epsilonScale;   // Dynamic hit threshold multiplier (1.0 to 1.5)
+    uniform float u_epsilonScale;   // Dynamic hit threshold multiplier
+    uniform float u_param;          // Slider 1: Morph / Mathematical parameter
+    uniform float u_glow;           // Slider 3: Specular hardness & rim sheen
+    uniform float u_colorShift;     // Slider 4: Orbit trap phase shift
+    uniform float u_aoStrength;     // Slider 5: AO shadow contrast
 
     // Analytical Bounding Sphere Check: zero extra cost on miss
     bool intersectSphere(vec3 ro, vec3 rd, float rad, out float tEnter, out float tExit) {
@@ -420,19 +667,26 @@
       tEnter = -b - h;
       tExit = -b + h;
       if (tExit < 0.0) return false;
-      tEnter = max(tEnter, 0.02);
+      tEnter = max(tEnter, 0.005);
       return true;
     }
 
-    // 1. Clean Power-8 Mandelbulb: Iconic bulbous lobes with broad polished surfaces (iterations: 4 - 6)
-    float deMandelbulb(vec3 p, out float trap) {
+    float getBoundingRadius(int eq) {
+      if (eq == 0) return 2.5; // Mandelbulb
+      if (eq == 1) return 3.5; // Mandelbox
+      if (eq == 2) return 2.2; // Menger Sponge
+      if (eq == 3) return 2.3; // Quaternion Julia
+      return 2.8;              // Sierpinski KIFS
+    }
+
+    // 1. Power-N Mandelbulb: Bulbous organic lobes with variable power morph
+    float deMandelbulb(vec3 p, float power, out float trap) {
       vec3 w = p;
       float dz = 1.0;
       float r = 0.0;
       trap = 1e10;
-      const float power = 8.0;
 
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 10; i++) {
         if (i >= u_maxIter) break;
         r = length(w);
         trap = min(trap, abs(w.z) * 0.85 + length(w.xy) * 0.35);
@@ -451,17 +705,17 @@
       return 0.5 * log(max(r, 1.0001)) * r / max(dz, 1e-6);
     }
 
-    // 2. Architectural Mandelbox: Monolithic architectural crystal forms with broad polished planes (iterations: 4 - 6)
-    float deMandelbox(vec3 p, out float trap) {
+    // 2. Architectural Mandelbox: Tglad's folding crystal metropolis
+    float deMandelbox(vec3 p, float boxScale, out float trap) {
       vec3 offset = p;
       vec3 z = p;
       float dz = 1.0;
       trap = 1e10;
-      const float scale = -2.2;
+      float scale = boxScale;
       const float minR2 = 0.25;
       const float fixR2 = 1.0;
 
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 10; i++) {
         if (i >= u_maxIter) break;
         // Tglad box fold
         z = clamp(z, -1.0, 1.0) * 2.0 - z;
@@ -486,19 +740,95 @@
       return (length(z) - 0.05) / max(abs(dz), 1e-5);
     }
 
+    // 3. Brutalist Menger Sponge: Infinite cruciform portals and architectural galleries
+    float deMenger(vec3 p, float morph, out float trap) {
+      vec3 z = p;
+      vec3 b = abs(z) - vec3(1.0);
+      float d = min(max(b.x, max(b.y, b.z)), 0.0) + length(max(b, 0.0));
+      float s = 1.0;
+      trap = 1e10;
+      float sc = morph;
+
+      for (int i = 0; i < 10; i++) {
+        if (i >= u_maxIter) break;
+        vec3 a = mod(z * s, 2.0) - 1.0;
+        s *= sc;
+        vec3 r = abs(1.0 - sc * abs(a));
+        float da = max(r.x, r.y);
+        float db = max(r.y, r.z);
+        float dc = max(r.z, r.x);
+        float c = (min(da, min(db, dc)) - 1.0) / s;
+        d = max(d, c);
+        trap = min(trap, length(r.xy) * 0.5 + abs(r.z) * 0.5);
+      }
+      return d;
+    }
+
+    // 4. Quaternion Julia: 4D hyper-slice producing twisting fluid ribbons and chrome loops
+    float deQuaternionJulia(vec3 p, float morph, out float trap) {
+      vec4 z = vec4(p, morph * 0.45);
+      vec4 c = vec4(-0.35, 0.55, 0.22, -0.15 + morph * 0.12);
+      float dz2 = 1.0;
+      float r2 = 0.0;
+      trap = 1e10;
+
+      for (int i = 0; i < 10; i++) {
+        if (i >= u_maxIter) break;
+        r2 = dot(z, z);
+        if (r2 > 4.5) break;
+
+        dz2 *= 4.0 * r2;
+        z = vec4(
+          z.x * z.x - dot(z.yzw, z.yzw),
+          2.0 * z.x * z.yzw
+        ) + c;
+
+        trap = min(trap, abs(z.x * z.y) * 1.2 + length(z.zw) * 0.6);
+      }
+      return 0.35 * sqrt(r2 / max(dz2, 1e-6)) * log(max(r2, 1.0001));
+    }
+
+    // 5. Sierpinski Polyhedral Gem (KIFS): Sacred geometry faceted crystal pyramid
+    float deKIFS(vec3 p, float morph, out float trap) {
+      vec3 z = p;
+      float scale = morph;
+      float totalScale = 1.0;
+      trap = 1e10;
+
+      for (int i = 0; i < 10; i++) {
+        if (i >= u_maxIter) break;
+        if (z.x + z.y < 0.0) z.xy = -z.yx;
+        if (z.x + z.z < 0.0) z.xz = -z.zx;
+        if (z.y + z.z < 0.0) z.yz = -z.zy;
+
+        z = z * scale - vec3(1.0, 1.0, 1.0) * (scale - 1.0);
+        totalScale *= scale;
+
+        trap = min(trap, length(z.xz) * 0.6 + abs(z.y) * 0.4);
+      }
+      return (length(z) - 0.45) / totalScale;
+    }
+
     // Master distance evaluator
     float mapScene(vec3 p, out float trap) {
       if (u_equation == 0) {
-        return deMandelbulb(p, trap);
+        return deMandelbulb(p, u_param, trap);
+      } else if (u_equation == 1) {
+        return deMandelbox(p, u_param, trap);
+      } else if (u_equation == 2) {
+        return deMenger(p, u_param, trap);
+      } else if (u_equation == 3) {
+        return deQuaternionJulia(p, u_param, trap);
       } else {
-        return deMandelbox(p, trap);
+        return deKIFS(p, u_param, trap);
       }
     }
 
-    // Lightweight 4-tap tetrahedral normal calculation:
-    // normal = normalize(e.xyy*map(p + e.xyy) + e.yyx*map(p + e.yyx) + e.yxy*map(p + e.yxy) + e.xxx*map(p + e.xxx))
+    // Lightweight 4-tap tetrahedral normal calculation with Deep-Zoom Definition Retention:
+    // Epsilon scales with camera ray travel distance to resolve micro-ridges cleanly without faceting
     vec3 calcNormal(vec3 p, float t) {
-      float eps = max(0.0005, t * 0.0006);
+      float pixelFootprint = (2.0 * tan(radians(u_fov * 0.5)) / u_res.y) * t;
+      float eps = max(0.00008, pixelFootprint * 0.45);
       vec2 e = vec2(1.0, -1.0) * 0.5773 * eps;
       float tr;
       return normalize(
@@ -525,15 +855,17 @@
       return clamp(1.0 - 2.6 * occ, 0.25, 1.0);
     }
 
-    // High-contrast clean palettes
+    // High-contrast clean palettes with dynamic Orbit Phase Shift
     vec3 getPaletteSurface(int pal, float trap, out vec3 specColor, out vec3 rimColor) {
       vec3 col = vec3(0.0);
       specColor = vec3(1.0);
       rimColor = vec3(1.0);
 
+      float tRaw = trap + u_colorShift * 0.35;
+      float t = clamp(fract(tRaw * 0.8), 0.0, 1.0);
+
       if (pal == 0) {
         // 1. Liquid Obsidian & Gold: Deep reflective onyx with pure 24K gold filaments
-        float t = clamp(trap * 0.85, 0.0, 1.0);
         vec3 obsidian = mix(vec3(0.015, 0.020, 0.028), vec3(0.065, 0.070, 0.085), t);
         vec3 gold = vec3(1.0, 0.80, 0.25);
         float goldEdge = pow(1.0 - t, 2.4);
@@ -542,7 +874,6 @@
         rimColor = gold;
       } else if (pal == 1) {
         // 2. Deep Neon Cyan: Electric cyber-grid on midnight carbon
-        float t = clamp(trap * 0.75, 0.0, 1.0);
         vec3 navy = mix(vec3(0.010, 0.020, 0.038), vec3(0.030, 0.060, 0.110), t);
         vec3 cyan = vec3(0.0, 0.95, 1.0);
         col = mix(cyan * 0.85, navy, smoothstep(0.03, 0.70, t));
@@ -550,15 +881,13 @@
         rimColor = cyan;
       } else if (pal == 2) {
         // 3. Pearlescent Porcelain: Sculptural museum marble with pearlescent sheen
-        float t = clamp(trap * 0.70, 0.0, 1.0);
         vec3 porcelain = mix(vec3(0.80, 0.83, 0.88), vec3(0.96, 0.97, 0.99), t);
-        vec3 shimmer = mix(vec3(0.92, 0.84, 1.0), vec3(0.82, 0.95, 1.0), sin(trap * 6.28) * 0.5 + 0.5);
+        vec3 shimmer = mix(vec3(0.92, 0.84, 1.0), vec3(0.82, 0.95, 1.0), sin((tRaw + 0.1) * 6.28) * 0.5 + 0.5);
         col = mix(porcelain, shimmer, 0.18);
         specColor = vec3(1.0, 1.0, 1.0);
         rimColor = vec3(0.88, 0.94, 1.0);
       } else {
         // 4. Crimson Magma: Volcanic cooled basalt with molten glowing magma
-        float t = clamp(trap * 0.80, 0.0, 1.0);
         vec3 basalt = mix(vec3(0.025, 0.018, 0.020), vec3(0.095, 0.065, 0.065), t);
         vec3 magma = mix(vec3(1.0, 0.10, 0.01), vec3(1.0, 0.65, 0.05), pow(1.0 - t, 2.0));
         col = mix(magma, basalt, smoothstep(0.02, 0.60, t));
@@ -588,9 +917,9 @@
       float fovFactor = tan(radians(u_fov * 0.5));
       vec3 rd = normalize(p.x * uu * fovFactor + p.y * vv * fovFactor + ww);
 
-      // Analytical Bounding Sphere Envelope: Exit immediately if missed (radius 2.5)
-      float boundingRadius = 2.5;
-      float tEnter = 0.02;
+      // Analytical Bounding Sphere Envelope Check
+      float boundingRadius = getBoundingRadius(u_equation);
+      float tEnter = 0.006;
       float tExit = 24.0;
       bool hitBound = intersectSphere(ro, rd, boundingRadius, tEnter, tExit);
 
@@ -599,23 +928,30 @@
         return;
       }
 
-      // Raymarching: dynamic step budget regulated by performance controller
+      // Raymarching: dynamic step budget regulated by performance governor
       float t = tEnter;
       float tMax = min(tExit, 24.0);
       float stepFudge = u_stepMultiplier;
       bool hit = false;
       float hitTrap = 0.0;
       float trap = 0.0;
+      float boundR2 = boundingRadius * boundingRadius;
 
-      for (int i = 0; i < 48; i++) {
+      for (int i = 0; i < 54; i++) {
         if (i >= u_maxSteps || t > tMax) break;
         vec3 pos = ro + rd * t;
 
-        // Early ray escape threshold: terminate immediately if ray travels beyond radius 2.5
-        if (dot(pos, pos) > 6.25) break;
+        // Early ray escape threshold
+        if (dot(pos, pos) > boundR2) break;
 
         float d = mapScene(pos, trap);
-        float eps = max(0.001 * u_epsilonScale, 0.0008 * t * u_epsilonScale);
+
+        // Deep-Zoom Adaptive Epsilon:
+        // Adapts hit detection to camera ray travel distance and pixel footprint.
+        // Prevents premature step stopping during deep zoom, ensuring razor-sharp sub-pixel edge definition.
+        float pixelFootprint = (2.0 * tan(radians(u_fov * 0.5)) / u_res.y) * t;
+        float eps = max(0.00007 * u_epsilonScale, pixelFootprint * 0.52 * u_epsilonScale);
+
         if (d < eps) {
           hit = true;
           hitTrap = trap;
@@ -630,20 +966,21 @@
         vec3 pos = ro + rd * t;
         vec3 nor = calcNormal(pos, t);
 
-        // Single directional key light with hard specular glints on metallic edges
+        // Directional key light with Blinn-Phong specular glints on metallic edges
         vec3 keyDir = normalize(vec3(1.25, 1.75, 1.05));
         float keyDiff = max(dot(nor, keyDir), 0.0);
         float skyDiff = clamp(nor.y * 0.5 + 0.5, 0.0, 1.0) * 0.18;
 
-        // Contact AO
-        float ao = calcAO(pos, nor);
+        // Contact Ambient Occlusion with Contrast slider modulation
+        float rawAO = calcAO(pos, nor);
+        float ao = pow(rawAO, u_aoStrength);
 
         // Hard Blinn-Phong specular glints on metallic edges
         vec3 halfVec = normalize(keyDir - rd);
         float spec = pow(max(dot(nor, halfVec), 0.0), 64.0);
         float fresnel = pow(clamp(1.0 + dot(rd, nor), 0.0, 1.0), 3.5);
 
-        // Surface palette color
+        // Surface palette color with phase shift
         vec3 specColor;
         vec3 rimColor;
         vec3 surface = getPaletteSurface(u_palette, hitTrap, specColor, rimColor);
@@ -652,9 +989,9 @@
         vec3 lighting = (keyDiff * vec3(1.45, 1.38, 1.30) + skyDiff * vec3(0.35, 0.40, 0.50)) * ao;
         col = surface * lighting;
 
-        // Metallic edges specular glints and silhouette rim
-        col += rimColor * fresnel * 0.50 * ao;
-        col += specColor * spec * 2.5 * ao;
+        // Metallic edges specular glints and silhouette rim scaled by Glow slider
+        col += rimColor * fresnel * (0.45 * u_glow) * ao;
+        col += specColor * spec * (2.2 * u_glow) * ao;
 
         // Subtle atmospheric depth fade
         float fog = 1.0 - exp(-t * 0.06);
@@ -682,9 +1019,9 @@
 
       // State
       const state = {
-        equation: 0,       // 0: Mandelbulb, 1: Mandelbox
+        equation: 0,       // 0: Mandelbulb, 1: Mandelbox, 2: Menger, 3: Julia, 4: KIFS
         palette: 0,        // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Magma
-        renderScale: 0.75, // 0.5x, 0.75x, 1.0x
+        renderScale: 0.5,  // Bootstrap 0.5x
         fov: 54.0,
         // Camera spherical coords
         yaw: 0.8,
@@ -693,13 +1030,47 @@
         targetYaw: 0.8,
         targetPitch: 0.35,
         targetDist: 2.65,
-        camTarget: [0, 0, 0]
+        camTarget: [0, 0, 0],
+        // 5 Math & Visual Parameters
+        param: 8.0,        // Slider 1: Morph
+        detail: 6,         // Slider 2: Detail / Iterations (4 to 10)
+        glow: 1.5,         // Slider 3: Key Specular & Rim Sheen (0.2 to 3.0)
+        colorShift: 0.0,   // Slider 4: Orbit Trap Color Cycle (0.0 to 6.28)
+        shadow: 1.8        // Slider 5: AO Shadow Contrast (0.5 to 3.5)
       };
 
-      // Equation presets: ideal viewing distances & limits
+      // 5 Equation Presets with Deep-Zoom limits & customized Morph math configs
       const eqConfigs = [
-        { defaultDist: 2.65, minDist: 1.3, maxDist: 4.8, defaultYaw: 0.8, defaultPitch: 0.35 }, // Mandelbulb
-        { defaultDist: 4.3,  minDist: 2.4, maxDist: 8.5, defaultYaw: 0.75, defaultPitch: 0.45 }  // Mandelbox
+        {
+          name: 'Mandelbulb',
+          defaultDist: 2.65, minDist: 0.10, maxDist: 5.5, defaultYaw: 0.8, defaultPitch: 0.35,
+          camTarget: [0, 0, 0],
+          morph: { name: 'Power', val: 8.0, min: 3.0, max: 12.0, step: 0.1, decimals: 1 }
+        },
+        {
+          name: 'Mandelbox',
+          defaultDist: 4.2,  minDist: 0.15, maxDist: 8.5, defaultYaw: 0.75, defaultPitch: 0.45,
+          camTarget: [0, 0, 0],
+          morph: { name: 'Scale', val: -2.2, min: -2.8, max: -1.3, step: 0.05, decimals: 2 }
+        },
+        {
+          name: 'Menger',
+          defaultDist: 2.7,  minDist: 0.12, maxDist: 6.0, defaultYaw: 0.65, defaultPitch: 0.40,
+          camTarget: [0, 0, 0],
+          morph: { name: 'Aperture', val: 3.0, min: 2.2, max: 3.8, step: 0.05, decimals: 2 }
+        },
+        {
+          name: 'Julia 4D',
+          defaultDist: 2.2,  minDist: 0.08, maxDist: 5.0, defaultYaw: 0.9, defaultPitch: 0.30,
+          camTarget: [0, 0, 0],
+          morph: { name: '4D Slice', val: 0.0, min: -1.0, max: 1.0, step: 0.02, decimals: 2 }
+        },
+        {
+          name: 'KIFS Gem',
+          defaultDist: 2.8,  minDist: 0.10, maxDist: 6.0, defaultYaw: 0.7, defaultPitch: 0.38,
+          camTarget: [0, 0, 0],
+          morph: { name: 'Fold', val: 2.0, min: 1.6, max: 2.5, step: 0.02, decimals: 2 }
+        }
       ];
 
       // WebGL Initialization
@@ -763,18 +1134,22 @@
       gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
       // Uniform Locations
-      const uResLocation       = gl.getUniformLocation(prog, 'u_res');
-      const uCamPosLocation    = gl.getUniformLocation(prog, 'u_camPos');
-      const uCamTargetLocation = gl.getUniformLocation(prog, 'u_camTarget');
-      const uFovLocation       = gl.getUniformLocation(prog, 'u_fov');
-      const uTimeLocation      = gl.getUniformLocation(prog, 'u_time');
-      const uEquationLocation  = gl.getUniformLocation(prog, 'u_equation');
-      const uPaletteLocation   = gl.getUniformLocation(prog, 'u_palette');
-      const uMaxStepsLocation  = gl.getUniformLocation(prog, 'u_maxSteps');
-      const uMaxIterLocation   = gl.getUniformLocation(prog, 'u_maxIter');
-      const uAoTapsLocation    = gl.getUniformLocation(prog, 'u_aoTaps');
-      const uStepMultLocation  = gl.getUniformLocation(prog, 'u_stepMultiplier');
-      const uEpsScaleLocation  = gl.getUniformLocation(prog, 'u_epsilonScale');
+      const uResLocation        = gl.getUniformLocation(prog, 'u_res');
+      const uCamPosLocation     = gl.getUniformLocation(prog, 'u_camPos');
+      const uCamTargetLocation  = gl.getUniformLocation(prog, 'u_camTarget');
+      const uFovLocation        = gl.getUniformLocation(prog, 'u_fov');
+      const uTimeLocation       = gl.getUniformLocation(prog, 'u_time');
+      const uEquationLocation   = gl.getUniformLocation(prog, 'u_equation');
+      const uPaletteLocation    = gl.getUniformLocation(prog, 'u_palette');
+      const uMaxStepsLocation   = gl.getUniformLocation(prog, 'u_maxSteps');
+      const uMaxIterLocation    = gl.getUniformLocation(prog, 'u_maxIter');
+      const uAoTapsLocation     = gl.getUniformLocation(prog, 'u_aoTaps');
+      const uStepMultLocation   = gl.getUniformLocation(prog, 'u_stepMultiplier');
+      const uEpsScaleLocation   = gl.getUniformLocation(prog, 'u_epsilonScale');
+      const uParamLocation      = gl.getUniformLocation(prog, 'u_param');
+      const uGlowLocation       = gl.getUniformLocation(prog, 'u_glow');
+      const uColorShiftLocation = gl.getUniformLocation(prog, 'u_colorShift');
+      const uAoStrengthLocation = gl.getUniformLocation(prog, 'u_aoStrength');
 
       // Automated Adaptive Performance Governor
       class AdaptivePerformanceGovernor {
@@ -782,9 +1157,9 @@
           // Lightweight Bootstrap Mode
           this.renderScale = 0.5;      // Initial render scale: 0.5x
           this.targetScale = 0.5;
-          this.maxSteps = 28;           // Initial max ray steps: 28
-          this.maxIter = 5;             // Initial iterations: 5 (strictly capped to 4 - 6)
-          this.aoTaps = 2;              // Crisp lightweight contact AO
+          this.maxSteps = 28;          // Initial max ray steps: 28
+          this.iterPenalty = 0;        // Iteration reduction when overloaded
+          this.aoTaps = 2;             // Crisp lightweight contact AO
           this.stepMultiplier = 0.85;
           this.epsilonScale = 1.0;
 
@@ -809,7 +1184,7 @@
           // Measure rolling frame delta
           this.rollingDt = 0.15 * dt + 0.85 * this.rollingDt;
 
-          const baseFudge = (equation === 0) ? 0.85 : 0.78;
+          const baseFudge = (equation === 0 || equation === 2) ? 0.85 : 0.78;
           this.stepMultiplier = baseFudge;
 
           // 1. FRAME TIME EXCEEDS 16.7ms (FPS < 58) -> DOWNGRADE
@@ -822,11 +1197,10 @@
 
             // Reduce ray steps by 2 until solid 60 FPS is restored (min 16 steps)
             if (now - this.lastStepReduceTime > 250) {
-              if (this.maxSteps > 16) {
+              if (this.maxSteps > 18) {
                 this.maxSteps -= 2;
-              }
-              if (this.maxIter > 4) {
-                this.maxIter = 4;
+              } else if (this.iterPenalty < 3) {
+                this.iterPenalty++;
               }
               this.lastStepReduceTime = now;
             }
@@ -837,13 +1211,13 @@
 
             // Only scale up quality if frame time has remained reliably under 14ms for at least 3 seconds
             if (this.under14msDuration >= 3000) {
-              if (this.targetScale < 0.75) {
+              if (this.iterPenalty > 0) {
+                this.iterPenalty--;
+              } else if (this.targetScale < 0.75) {
                 this.targetScale = Math.min(0.75, this.targetScale + 0.05);
                 this.renderScale = this.targetScale;
-              } else if (this.maxSteps < 36) {
+              } else if (this.maxSteps < 44) {
                 this.maxSteps += 2;
-              } else if (this.maxIter < 6) {
-                this.maxIter = 6;
               } else if (this.aoTaps < 3) {
                 this.aoTaps = 3;
               } else if (this.targetScale < 1.0) {
@@ -1014,12 +1388,13 @@
       canvas.addEventListener('pointerup', endPointer);
       canvas.addEventListener('pointercancel', endPointer);
 
-      // Desktop Mouse Wheel Zoom
+      // Desktop Mouse Wheel Zoom with Deep-Zoom Support
       canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         const cfg = eqConfigs[state.equation];
         const zoomDelta = Math.sign(e.deltaY) * 0.08 * state.targetDist;
         state.targetDist = Math.max(cfg.minDist, Math.min(cfg.maxDist, state.targetDist + zoomDelta));
+        resetIdleTimer();
       }, { passive: false });
 
       // Double Tap / Double Click to Reset Camera
@@ -1032,16 +1407,156 @@
         lastTap = now;
       });
 
+      // DOM Elements for 5 Sliders & Tuning Drawer
+      const sliderMorph     = document.getElementById('slider-morph');
+      const sliderDetail    = document.getElementById('slider-detail');
+      const sliderGlow      = document.getElementById('slider-glow');
+      const sliderColor     = document.getElementById('slider-color');
+      const sliderShadow    = document.getElementById('slider-shadow');
+
+      const valMorphEl      = document.getElementById('val-morph');
+      const valDetailEl     = document.getElementById('val-detail');
+      const valGlowEl       = document.getElementById('val-glow');
+      const valColorEl      = document.getElementById('val-color');
+      const valShadowEl     = document.getElementById('val-shadow');
+
+      const tuningPanelEl   = document.getElementById('tuning-panel');
+      const btnToggleTuning = document.getElementById('btn-toggle-tuning');
+      const btnResetSliders = document.getElementById('btn-reset-sliders');
+      const btnRandomSliders = document.getElementById('btn-random-sliders');
+
+      function updateMorphSliderUI() {
+        const mCfg = eqConfigs[state.equation].morph;
+        if (!sliderMorph) return;
+        sliderMorph.min = mCfg.min;
+        sliderMorph.max = mCfg.max;
+        sliderMorph.step = mCfg.step;
+        sliderMorph.value = state.param;
+        if (valMorphEl) {
+          valMorphEl.textContent = `${mCfg.name} ${Number(state.param).toFixed(mCfg.decimals)}`;
+        }
+      }
+
+      // Slider 1: Morph Form
+      if (sliderMorph) {
+        sliderMorph.addEventListener('input', (e) => {
+          state.param = parseFloat(e.target.value);
+          eqConfigs[state.equation].morph.val = state.param;
+          const mCfg = eqConfigs[state.equation].morph;
+          if (valMorphEl) valMorphEl.textContent = `${mCfg.name} ${state.param.toFixed(mCfg.decimals)}`;
+          resetIdleTimer();
+        });
+      }
+
+      // Slider 2: Detail / Iterations
+      if (sliderDetail) {
+        sliderDetail.addEventListener('input', (e) => {
+          state.detail = parseInt(e.target.value, 10);
+          if (valDetailEl) valDetailEl.textContent = `${state.detail} iter`;
+          resetIdleTimer();
+        });
+      }
+
+      // Slider 3: Glow / Sheen
+      if (sliderGlow) {
+        sliderGlow.addEventListener('input', (e) => {
+          state.glow = parseFloat(e.target.value);
+          if (valGlowEl) valGlowEl.textContent = `${state.glow.toFixed(1)}x`;
+          resetIdleTimer();
+        });
+      }
+
+      // Slider 4: Color Cycle / Orbit Phase
+      if (sliderColor) {
+        sliderColor.addEventListener('input', (e) => {
+          state.colorShift = parseFloat(e.target.value);
+          if (valColorEl) valColorEl.textContent = `${state.colorShift >= 0 ? '+' : ''}${state.colorShift.toFixed(2)}`;
+          resetIdleTimer();
+        });
+      }
+
+      // Slider 5: Shadow / AO Contrast
+      if (sliderShadow) {
+        sliderShadow.addEventListener('input', (e) => {
+          state.shadow = parseFloat(e.target.value);
+          if (valShadowEl) valShadowEl.textContent = `${state.shadow.toFixed(1)}x`;
+          resetIdleTimer();
+        });
+      }
+
+      // Prevent slider touches from causing camera orbit/pinch
+      const stopSliderProp = (e) => e.stopPropagation();
+      [sliderMorph, sliderDetail, sliderGlow, sliderColor, sliderShadow, tuningPanelEl].forEach(el => {
+        if (!el) return;
+        el.addEventListener('pointerdown', stopSliderProp, { passive: true });
+        el.addEventListener('pointermove', stopSliderProp, { passive: true });
+        el.addEventListener('touchstart', stopSliderProp, { passive: true });
+        el.addEventListener('touchmove', stopSliderProp, { passive: true });
+      });
+
+      // Toggle Tuning Drawer
+      if (btnToggleTuning && tuningPanelEl) {
+        btnToggleTuning.addEventListener('click', () => {
+          const isClosed = tuningPanelEl.classList.toggle('closed');
+          btnToggleTuning.classList.toggle('active', !isClosed);
+          resetIdleTimer();
+        });
+      }
+
+      // Reset Sliders to Defaults
+      if (btnResetSliders) {
+        btnResetSliders.addEventListener('click', () => {
+          const mCfg = eqConfigs[state.equation].morph;
+          state.param = (state.equation === 0) ? 8.0 : (state.equation === 1 ? -2.2 : (state.equation === 2 ? 3.0 : (state.equation === 3 ? 0.0 : 2.0)));
+          mCfg.val = state.param;
+          state.detail = 6;
+          state.glow = 1.5;
+          state.colorShift = 0.0;
+          state.shadow = 1.8;
+
+          if (sliderDetail) sliderDetail.value = 6;
+          if (sliderGlow) sliderGlow.value = 1.5;
+          if (sliderColor) sliderColor.value = 0.0;
+          if (sliderShadow) sliderShadow.value = 1.8;
+
+          if (valDetailEl) valDetailEl.textContent = '6 iter';
+          if (valGlowEl) valGlowEl.textContent = '1.5x';
+          if (valColorEl) valColorEl.textContent = '+0.00';
+          if (valShadowEl) valShadowEl.textContent = '1.8x';
+
+          updateMorphSliderUI();
+          resetIdleTimer();
+        });
+      }
+
+      // Randomize Form / Math Parameter
+      if (btnRandomSliders) {
+        btnRandomSliders.addEventListener('click', () => {
+          const mCfg = eqConfigs[state.equation].morph;
+          const randVal = mCfg.min + Math.random() * (mCfg.max - mCfg.min);
+          state.param = parseFloat(randVal.toFixed(mCfg.decimals));
+          mCfg.val = state.param;
+          state.colorShift = parseFloat((Math.random() * 6.28).toFixed(2));
+          if (sliderColor) sliderColor.value = state.colorShift;
+          if (valColorEl) valColorEl.textContent = `+${state.colorShift.toFixed(2)}`;
+          updateMorphSliderUI();
+          resetIdleTimer();
+        });
+      }
+
       // UI Bindings
-      // 1. Equation Switcher
+      // 1. Equation Switcher (5 Equations)
       const eqBtns = document.querySelectorAll('[data-eq]');
       eqBtns.forEach(btn => {
         btn.addEventListener('click', () => {
           const eq = parseInt(btn.dataset.eq, 10);
           if (state.equation === eq) return;
           state.equation = eq;
+          state.param = eqConfigs[eq].morph.val;
           eqBtns.forEach(b => b.classList.toggle('active', b === btn));
+          updateMorphSliderUI();
           resetCamera();
+          resetIdleTimer();
         });
       });
 
@@ -1052,6 +1567,7 @@
           const pal = parseInt(btn.dataset.palette, 10);
           state.palette = pal;
           palBtns.forEach(b => b.classList.toggle('active', b === btn));
+          resetIdleTimer();
         });
       });
 
@@ -1069,6 +1585,9 @@
         const hint = document.getElementById('gesture-hint');
         if (hint) hint.style.opacity = '0';
       }, 4500);
+
+      // Initialize Morph Slider UI
+      updateMorphSliderUI();
 
       // Render Loop
       const startTime = performance.now();
@@ -1104,10 +1623,14 @@
         gl.uniform1i(uEquationLocation, state.equation);
         gl.uniform1i(uPaletteLocation, state.palette);
         gl.uniform1i(uMaxStepsLocation, governor.maxSteps);
-        gl.uniform1i(uMaxIterLocation, governor.maxIter);
+        gl.uniform1i(uMaxIterLocation, Math.max(4, state.detail - governor.iterPenalty));
         gl.uniform1i(uAoTapsLocation, governor.aoTaps);
         gl.uniform1f(uStepMultLocation, governor.stepMultiplier);
         gl.uniform1f(uEpsScaleLocation, governor.epsilonScale);
+        gl.uniform1f(uParamLocation, state.param);
+        gl.uniform1f(uGlowLocation, state.glow);
+        gl.uniform1f(uColorShiftLocation, state.colorShift);
+        gl.uniform1f(uAoStrengthLocation, state.shadow);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       }

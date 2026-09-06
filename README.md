@@ -4,6 +4,8 @@ A real-time, browser-based WebGL 2.0 fractal exploration engine featuring proced
 
 Built entirely as a zero-dependency, self-contained single-page application.
 
+🎮 **Live Demo**: [https://brodizzle-byte.github.io/fractal-viewer/](https://brodizzle-byte.github.io/fractal-viewer/)
+
 ---
 
 ## Features

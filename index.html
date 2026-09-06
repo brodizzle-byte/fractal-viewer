@@ -1,0 +1,2616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AETHER-4D // Hyper-Fractal Democore & Cinema Engine</title>
+  <style>
+    :root {
+      --bg: #020306;
+      --panel-bg: rgba(6, 10, 18, 0.86);
+      --panel-border: rgba(0, 240, 255, 0.25);
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.5);
+      --accent2: #ff007f;
+      --gold: #f59e0b;
+      --emerald: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: rgba(11, 17, 30, 0.76);
+      --control-bg: rgba(8, 12, 22, 0.92);
+      --slider-track: #131b2c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Menlo, Monaco, monospace;
+      font-size: 11.5px;
+    }
+
+    #viewport {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+      cursor: grab;
+    }
+    #viewport:active {
+      cursor: grabbing;
+    }
+
+    /* Top HUD Bar */
+    #top-bar {
+      position: fixed;
+      top: 10px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      padding: 6px 12px;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85);
+      pointer-events: auto;
+    }
+
+    .brand-logo {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .brand-logo svg {
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      color: #fff;
+      font-size: 12px;
+    }
+    .brand-tag {
+      font-size: 9px;
+      background: rgba(0, 240, 255, 0.16);
+      color: var(--accent);
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 240, 255, 0.32);
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .hud-actions {
+      display: flex;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .hud-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      color: var(--text);
+      padding: 6px 11px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+    }
+    .hud-btn:hover {
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 16px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+    .hud-btn.active {
+      background: rgba(0, 240, 255, 0.22);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+    .hud-btn.primary {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Minimal Glassmorphic HUD Panel */
+    #hud-panel {
+      position: fixed;
+      top: 54px;
+      left: 12px;
+      bottom: 20px;
+      width: 360px;
+      max-width: calc(100vw - 24px);
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 10px;
+      z-index: 20;
+      box-shadow: 0 16px 56px rgba(0, 0, 0, 0.88);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+      overflow: hidden;
+    }
+    #hud-panel.hidden-hud {
+      transform: translateX(calc(-100% - 24px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Preset Showcase Bar */
+    .preset-row {
+      padding: 8px 10px;
+      background: rgba(4, 7, 14, 0.8);
+      border-bottom: 1px solid var(--panel-border);
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+    }
+    .preset-pill {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 5px;
+      padding: 5px 6px;
+      font-size: 9.5px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .preset-pill:hover {
+      border-color: var(--accent);
+      color: #fff;
+      background: rgba(0, 240, 255, 0.12);
+    }
+    .preset-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 240, 255, 0.18);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+    }
+
+    .panel-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(5, 8, 16, 0.65);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 2px;
+      text-align: center;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: #fff;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: rgba(0, 240, 255, 0.06);
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--panel-border) transparent;
+    }
+    .panel-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .panel-content::-webkit-scrollbar-thumb {
+      background: var(--panel-border);
+      border-radius: 4px;
+    }
+
+    .control-group {
+      margin-bottom: 12px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 10px 11px;
+    }
+    .group-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 3px;
+    }
+
+    .row {
+      margin-bottom: 8px;
+    }
+    .row:last-child {
+      margin-bottom: 0;
+    }
+    .row-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+      font-size: 10.5px;
+    }
+    .row-label {
+      color: var(--text-muted);
+    }
+    .row-val {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Sliders & Inputs */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--slider-track);
+      border-radius: 2px;
+      outline: none;
+      transition: background 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      cursor: pointer;
+      border: 1px solid #fff;
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    select {
+      width: 100%;
+      background: var(--control-bg);
+      border: 1px solid var(--panel-border);
+      color: #fff;
+      padding: 5px 7px;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 11px;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    /* Switch toggle */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .toggle-label {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 30px;
+      height: 16px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #141c2e;
+      transition: .2s;
+      border-radius: 16px;
+      border: 1px solid var(--panel-border);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 10px;
+      width: 10px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(14px);
+      background-color: #020306;
+    }
+
+    /* Virtual Joystick for Mobile Drone Mode */
+    #joystick-container {
+      position: fixed;
+      bottom: 26px;
+      left: 26px;
+      width: 116px;
+      height: 116px;
+      border-radius: 50%;
+      background: rgba(8, 14, 26, 0.45);
+      border: 2px solid rgba(0, 240, 255, 0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 30;
+      display: none;
+      touch-action: none;
+    }
+    #joystick-stick {
+      position: absolute;
+      top: 33px;
+      left: 33px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent) 0%, rgba(0, 240, 255, 0.4) 100%);
+      box-shadow: 0 0 16px var(--accent-glow);
+      border: 2px solid #fff;
+      pointer-events: none;
+      transition: transform 0.05s ease-out;
+    }
+
+    #altitude-controls {
+      position: fixed;
+      bottom: 26px;
+      right: 26px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 30;
+    }
+    .alt-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--panel-bg);
+      border: 1px solid var(--accent);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(0, 240, 255, 0.3);
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .alt-btn:active {
+      transform: scale(0.92);
+      background: rgba(0, 240, 255, 0.3);
+    }
+
+    /* Audio Spectrum Visualizer HUD Canvas */
+    #audio-vis-canvas {
+      width: 100%;
+      height: 38px;
+      background: rgba(4, 8, 16, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.22);
+      border-radius: 6px;
+      margin-top: 8px;
+      display: block;
+    }
+
+    /* Bottom Status Bar */
+    #status-bar {
+      position: fixed;
+      bottom: 10px;
+      right: 12px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+      pointer-events: none;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      transition: background 0.2s;
+    }
+    .status-dot.active-dynamic {
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+    }
+    .status-val {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Help Modal */
+    #help-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      width: 440px;
+      max-width: 90vw;
+      background: rgba(6, 10, 18, 0.97);
+      border: 1px solid var(--accent);
+      box-shadow: 0 16px 64px rgba(0, 240, 255, 0.25);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 10px;
+      padding: 18px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #help-modal.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 6px;
+    }
+    .modal-title {
+      font-weight: 800;
+      font-size: 12.5px;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .shortcut-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+    }
+    .shortcut-table td {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .key-badge {
+      display: inline-block;
+      background: var(--control-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: 6px;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(0, 240, 255, 0.95);
+      color: #020306;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen WebGL Raymarching Viewport -->
+  <canvas id="viewport"></canvas>
+
+  <!-- Top Bar HUD -->
+  <div id="top-bar">
+    <div class="brand-cluster">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="12" y1="22" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+          <line x1="22" y1="8.5" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+          <line x1="2" y1="8.5" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </div>
+      <div>
+        <span class="brand-title">AETHER-4D</span>
+        <span class="brand-tag">CINEMA-CORE</span>
+      </div>
+    </div>
+
+    <div class="hud-actions">
+      <!-- 1-Tap Cinematic Autopilot -->
+      <button class="hud-btn primary" id="btn-tour" title="Cinematic Autopilot through Interior Spline Tunnels (T)">
+        <span id="tour-icon">🎬</span> Autopilot [T]
+      </button>
+
+      <!-- 1-Tap Microphone / Audio Toggle -->
+      <button class="hud-btn" id="btn-mic-toggle" title="Toggle Live Microphone / Music Reactivity">
+        <span id="mic-icon">🎤</span> Mic / Music
+      </button>
+
+      <button class="hud-btn" id="btn-cam-mode" title="Toggle Orbit / Drone Flight (C)">
+        <span id="cam-mode-icon">🛰️</span> <span id="cam-mode-label">Orbit</span> [C]
+      </button>
+
+      <!-- 1-Tap Screenshot (4K Super-Sample) -->
+      <button class="hud-btn primary" id="btn-snapshot-4k" title="1-Tap Screenshot (4K Super-Sample PNG) [P]">
+        <span>📸</span> 4K Super-Sample [P]
+      </button>
+
+      <button class="hud-btn" id="btn-toggle-hud" title="Toggle Minimal Glassmorphic HUD (H)">
+        <span>👁️</span> HUD [H]
+      </button>
+
+      <button class="hud-btn" id="btn-reset-cam" title="Reset Camera Framing (R)">
+        <span>🔄</span>
+      </button>
+
+      <button class="hud-btn" id="btn-help" title="Controls & Shortcuts (?)">
+        <span>❓</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Minimal Glassmorphic HUD -->
+  <div id="hud-panel">
+    <!-- Director's Cut Showcase Presets -->
+    <div class="preset-row">
+      <div class="preset-pill active" data-preset="chrome-metropolis">🏛️ Chrome Metropolis</div>
+      <div class="preset-pill" data-preset="neon-tesseract">⚡ Neon Cyber-Tesseract</div>
+      <div class="preset-pill" data-preset="liquid-gold">👑 Liquid Gold Monolith</div>
+      <div class="preset-pill" data-preset="deep-bioluminescence">🌌 Deep Bioluminescence</div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="panel-tabs">
+      <button class="tab-btn active" data-tab="tab-topologies">TOPOLOGY</button>
+      <button class="tab-btn" data-tab="tab-lighting">LIGHTING</button>
+      <button class="tab-btn" data-tab="tab-audio">AUDIO FFT</button>
+      <button class="tab-btn" data-tab="tab-camera">CAMERA & HAPTICS</button>
+    </div>
+
+    <div class="panel-content">
+      <!-- TAB 1: FRACTAL TOPOLOGIES -->
+      <div id="tab-topologies" class="tab-pane">
+        <div class="control-group">
+          <div class="group-title">
+            <span>Topology Model</span>
+            <span id="label-eq-name" style="color:#fff; font-size:9.5px;">MANDELBOX</span>
+          </div>
+          <div class="row">
+            <select id="sel-equation">
+              <option value="0">Infinite Mandelbox (Architectural Columns)</option>
+              <option value="1">4D Quaternion Julia (Dynamic W-Slice)</option>
+              <option value="2">Classic Mandelbulb (Power 8)</option>
+              <option value="3">Apollonian Gasket / Spherical Sponge</option>
+            </select>
+          </div>
+
+          <div class="row" id="row-power" style="display:none;">
+            <div class="row-header">
+              <span class="row-label">Mandelbulb Order N</span>
+              <span class="row-val" id="val-power">8.00</span>
+            </div>
+            <input type="range" id="param-power" min="2.0" max="16.0" step="0.05" value="8.0">
+          </div>
+
+          <div class="row" id="row-scale">
+            <div class="row-header">
+              <span class="row-label">Lattice Scale Factor</span>
+              <span class="row-val" id="val-scale">-2.20</span>
+            </div>
+            <input type="range" id="param-scale" min="-3.5" max="3.5" step="0.05" value="-2.2">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="group-title">4D Hyper-Slicing & Morphing</div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">4D Slice (W Parameter)</span>
+              <span class="row-val" id="val-slice-w">0.00</span>
+            </div>
+            <input type="range" id="param-slice-w" min="-2.00" max="2.00" step="0.01" value="0.00">
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label">Dynamic W-Slice Auto-Morph</span>
+            <label class="switch">
+              <input type="checkbox" id="toggle-auto-morph">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: ADVANCED LIGHTING PIPELINE -->
+      <div id="tab-lighting" class="tab-pane" style="display:none;">
+        <div class="control-group">
+          <div class="group-title">Analytical Soft Shadows & Penumbra</div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Penumbra Softness Factor</span>
+              <span class="row-val" id="val-shadow-softness">14.0</span>
+            </div>
+            <input type="range" id="param-shadow-softness" min="4.0" max="32.0" step="1.0" value="14.0">
+          </div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Volumetric Crevice AO</span>
+              <span class="row-val" id="val-ao-intensity">1.40</span>
+            </div>
+            <input type="range" id="param-ao-intensity" min="0.00" max="2.50" step="0.05" value="1.40">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="group-title">Volumetric Dust Haze & God Rays</div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Crevice Dust Haze / God Rays</span>
+              <span class="row-val" id="val-god-rays">0.90</span>
+            </div>
+            <input type="range" id="param-god-rays" min="0.00" max="2.00" step="0.05" value="0.90">
+          </div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Atmospheric Depth Fog</span>
+              <span class="row-val" id="val-fog-density">0.06</span>
+            </div>
+            <input type="range" id="param-fog-density" min="0.00" max="0.25" step="0.01" value="0.06">
+          </div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Emissive Core Glow</span>
+              <span class="row-val" id="val-edge-glow">1.00</span>
+            </div>
+            <input type="range" id="param-edge-glow" min="0.00" max="2.00" step="0.05" value="1.00">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="group-title">ACES Tonemapping & High-Contrast Optics</div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Edge Chromatic Aberration</span>
+              <span class="row-val" id="val-chroma">0.85</span>
+            </div>
+            <input type="range" id="param-chroma" min="0.00" max="2.50" step="0.05" value="0.85">
+          </div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Studio Specular Glints</span>
+              <span class="row-val" id="val-specular">1.50</span>
+            </div>
+            <input type="range" id="param-specular" min="0.00" max="3.00" step="0.10" value="1.50">
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: WEB AUDIO REACTIVITY -->
+      <div id="tab-audio" class="tab-pane" style="display:none;">
+        <div class="control-group">
+          <div class="group-title">Audio Input Mode</div>
+          <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+            <button class="hud-btn" id="btn-toggle-mic" style="flex:1; justify-content:center;">
+              🎤 Live Microphone / Line-In
+            </button>
+            <button class="hud-btn" id="btn-toggle-synth" style="flex:1; justify-content:center;">
+              🌌 Space Synth
+            </button>
+          </div>
+          <canvas id="audio-vis-canvas"></canvas>
+        </div>
+
+        <div class="control-group">
+          <div class="group-title">FFT Frequency Modulation</div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Bass &rarr; 4D W-Slice Morphing</span>
+              <span class="row-val" id="val-audio-bass">1.60</span>
+            </div>
+            <input type="range" id="param-audio-bass" min="0.0" max="3.0" step="0.1" value="1.6">
+          </div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Mid/Highs &rarr; Vein & Circuit Glow</span>
+              <span class="row-val" id="val-audio-vein">1.80</span>
+            </div>
+            <input type="range" id="param-audio-vein" min="0.0" max="3.0" step="0.1" value="1.8">
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: CAMERA & IMMERSION (HAPTICS) -->
+      <div id="tab-camera" class="tab-pane" style="display:none;">
+        <div class="control-group">
+          <div class="group-title">Mobile Immersion & Haptics</div>
+          <div class="toggle-row">
+            <span class="toggle-label">Cavern Wall Collision Haptics (Vibration)</span>
+            <label class="switch">
+              <input type="checkbox" id="toggle-haptics" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label">DeviceOrientation Gyro Tilt</span>
+            <label class="switch">
+              <input type="checkbox" id="toggle-gyro">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="group-title">Autopilot Spline Dynamics</div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Autopilot Tunnel Speed</span>
+              <span class="row-val" id="val-tour-speed">1.00x</span>
+            </div>
+            <input type="range" id="param-tour-speed" min="0.2" max="3.0" step="0.1" value="1.0">
+          </div>
+          <div class="row">
+            <div class="row-header">
+              <span class="row-label">Field of View (FOV)</span>
+              <span class="row-val" id="val-fov">65°</span>
+            </div>
+            <input type="range" id="param-fov" min="30" max="110" step="1" value="65">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Virtual Joystick Overlay (Drone Mode) -->
+  <div id="joystick-container">
+    <div id="joystick-stick"></div>
+  </div>
+
+  <!-- Altitude Flight Controls (Drone Mode) -->
+  <div id="altitude-controls">
+    <button class="alt-btn" id="btn-alt-up">▲</button>
+    <button class="alt-btn" id="btn-alt-down">▼</button>
+  </div>
+
+  <!-- Bottom Status Bar -->
+  <div id="status-bar">
+    <div class="status-item">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-val" id="fps-display">60</span> FPS
+    </div>
+    <div class="status-item">
+      <span style="color:var(--text-muted);">RENDER:</span>
+      <span class="status-val" id="res-mode-display">CONVERGING</span>
+      (<span class="status-val" id="msaa-samples">1</span>x)
+    </div>
+    <div class="status-item">
+      <span style="color:var(--text-muted);">CORE:</span>
+      <span class="status-val" id="status-eq-display">Mandelbox</span>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="help-modal">
+    <div class="modal-header">
+      <span class="modal-title">HYPER-FRACTAL IMMERSION CONTROLS</span>
+      <button class="modal-close" id="btn-close-modal">✕</button>
+    </div>
+    <table class="shortcut-table">
+      <tr>
+        <td><span class="key-badge">T</span></td>
+        <td>Toggle Cinematic Autopilot (Interior Spline Tunnels)</td>
+      </tr>
+      <tr>
+        <td><span class="key-badge">C</span></td>
+        <td>Toggle Camera Mode: Orbit &harr; 6-DOF Drone Flight</td>
+      </tr>
+      <tr>
+        <td><span class="key-badge">W / A / S / D</span></td>
+        <td>6-DOF Drone Flight Navigation through interior caverns</td>
+      </tr>
+      <tr>
+        <td><span class="key-badge">Q / E</span></td>
+        <td>Altitude: Ascend / Descend</td>
+      </tr>
+      <tr>
+        <td><span class="key-badge">P</span></td>
+        <td>1-Tap Screenshot (4K Super-Sample PNG Export)</td>
+      </tr>
+      <tr>
+        <td><span class="key-badge">H / Swipe</span></td>
+        <td>Toggle Minimal Glassmorphic HUD overlay</td>
+      </tr>
+      <tr>
+        <td><span class="key-badge">R</span></td>
+        <td>Reset Camera View & Framing</td>
+      </tr>
+      <tr>
+        <td><span class="key-badge">Haptics</span></td>
+        <td>Mobile vibration pulses when nearing cavern walls</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">AETHER-4D Ready</div>
+
+  <!-- WebGL 2.0 Fullscreen Quad Vertex Shader -->
+  <script id="vs" type="x-shader/x-vertex">#version 300 es
+    in vec2 a_position;
+    out vec2 v_uv;
+    void main() {
+      v_uv = a_position * 0.5 + 0.5;
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }
+  </script>
+
+  <!-- WebGL 2.0 Raymarching Fragment Shader -->
+  <script id="fs" type="x-shader/x-fragment">#version 300 es
+    precision highp float;
+    precision highp int;
+
+    in vec2 v_uv;
+    out vec4 fragColor;
+
+    // View & Camera Uniforms
+    uniform vec2  u_resolution;
+    uniform vec3  u_camPos;
+    uniform vec3  u_camTarget;
+    uniform float u_fov;
+    uniform float u_time;
+    uniform vec2  u_subpixelJitter;
+    uniform int   u_frame;
+    uniform sampler2D u_prevFrame;
+    uniform bool  u_useTemporalAA;
+
+    // Fractal Topologies
+    uniform int   u_equation;          // 0: Infinite Mandelbox, 1: 4D Julia, 2: Classic Mandelbulb, 3: Apollonian Gasket
+    uniform float u_power;             // Mandelbulb Power (8.0)
+    uniform int   u_maxIter;           // 8 to 30
+    uniform float u_scale;             // Folding scale
+    uniform float u_sliceW;            // 4D slice W-morph (-2.0 to 2.0)
+    uniform bool  u_useBoundingSphere; // Analytical bounding sphere early-exit
+
+    // Shading, Orbit Traps & Studio HDRI
+    uniform int   u_palette;           // Presets
+    uniform float u_circuitMix;        // Metallic circuit-board texture weight
+    uniform float u_veinMix;           // Biomechanical vein mapping weight
+    uniform float u_specular;          // Blinn-Phong studio glints
+    uniform float u_fresnel;           // Fresnel rim-lighting
+    uniform float u_aoIntensity;       // Volumetric crevice AO
+    uniform float u_edgeGlow;          // Subtle emissive core glow
+    uniform float u_stepMultiplier;    // Step fudge factor
+    uniform int   u_maxSteps;          // Ray steps
+
+    // Advanced Lighting Pipeline
+    uniform float u_shadowSoftness;    // Analytical soft penumbra factor (4.0 to 32.0)
+    uniform float u_godRayIntensity;   // Volumetric dust haze / God-ray accumulation
+    uniform float u_fogDensity;        // Depth atmospheric fog
+    uniform float u_chromaAberration;  // Lens chromatic aberration on high-contrast edges
+
+    // Audio Reactivity
+    uniform float u_audioBass;         // Bass frequency drive
+    uniform float u_audioMid;          // Mid frequency drive
+    uniform float u_audioHigh;         // High frequency drive
+
+    const float PI  = 3.141592653589793;
+    const float TAU = 6.283185307179586;
+
+    // Analytical Bounding Sphere Intersection
+    bool intersectSphere(vec3 ro, vec3 rd, float rad, out float tEnter, out float tExit) {
+      float b = dot(ro, rd);
+      float c = dot(ro, ro) - rad * rad;
+      float h = b * b - c;
+      if (h < 0.0) return false;
+      h = sqrt(h);
+      tEnter = -b - h;
+      tExit = -b + h;
+      if (tExit < 0.0) return false;
+      tEnter = max(tEnter, 0.02);
+      return true;
+    }
+
+    // Procedural Studio HDRI Environment Reflection
+    vec3 getStudioHDRI(vec3 dir, float roughness) {
+      vec3 col = mix(vec3(0.015, 0.025, 0.05), vec3(0.003, 0.006, 0.014), clamp(dir.y * 0.5 + 0.5, 0.0, 1.0));
+
+      // Softbox 1: Warm Key Light (Top-Right Front)
+      vec3 box1Dir = normalize(vec3(1.2, 1.4, 0.9));
+      float softbox1 = max(dot(dir, box1Dir), 0.0);
+      float box1Glint = pow(softbox1, 24.0 / max(roughness, 0.04));
+      col += vec3(1.3, 1.15, 0.95) * box1Glint * 1.8;
+
+      // Softbox 2: Cool Blue Rim Light (Left Back)
+      vec3 box2Dir = normalize(vec3(-1.5, 0.7, -1.1));
+      float softbox2 = max(dot(dir, box2Dir), 0.0);
+      float box2Glint = pow(softbox2, 32.0 / max(roughness, 0.04));
+      col += vec3(0.3, 0.85, 1.4) * box2Glint * 2.0;
+
+      // Studio Overhead Horizon Strip
+      float strip = smoothstep(0.94, 0.99, dir.y) * smoothstep(0.35, 0.0, abs(dir.x));
+      col += vec3(1.0, 1.0, 1.1) * strip * 1.2;
+
+      // Studio Ground Grid
+      if (dir.y < 0.0) {
+        float floorDist = -1.2 / min(dir.y, -0.01);
+        vec2 floorPos = dir.xz * floorDist;
+        float grid = smoothstep(0.04, 0.0, abs(fract(floorPos.x) - 0.5)) + smoothstep(0.04, 0.0, abs(fract(floorPos.y) - 0.5));
+        col = mix(col, vec3(0.01, 0.015, 0.03) + vec3(0.04, 0.07, 0.12) * grid * 0.4, clamp(-dir.y * 2.0, 0.0, 0.85));
+      }
+      return col;
+    }
+
+    // 1. INFINITE MANDELBOX (Box folding + sphere inversion + architectural columns)
+    float deMandelbox(vec3 p, out vec4 trap) {
+      float audioW = u_sliceW + u_audioBass * 0.35;
+      vec3 offset = p + vec3(0.0, 0.0, audioW * 0.2);
+      vec3 z = offset;
+      float dz = 1.0;
+      trap = vec4(1e10);
+      float foldLimit = 1.0;
+      float minR2 = 0.25;
+      float fixR2 = 1.0;
+
+      for (int i = 0; i < 30; i++) {
+        if (i >= u_maxIter) break;
+
+        // Tglad box fold
+        z = clamp(z, -foldLimit, foldLimit) * 2.0 - z;
+
+        // Architectural column modulation along Y-axis
+        z.xz = abs(z.xz);
+        if (z.x < z.z) z.xz = z.zx;
+
+        // Sphere fold
+        float r2 = dot(z, z);
+        if (r2 < minR2) {
+          float temp = fixR2 / minR2;
+          z *= temp; dz *= temp;
+        } else if (r2 < fixR2) {
+          float temp = fixR2 / r2;
+          z *= temp; dz *= temp;
+        }
+
+        z = u_scale * z + offset;
+        dz = dz * abs(u_scale) + 1.0;
+
+        trap.xyz = min(trap.xyz, abs(z));
+        trap.w = min(trap.w, dot(z, z));
+      }
+      return (length(z) - 0.1) / max(abs(dz), 1e-5);
+    }
+
+    // 2. 4D QUATERNION JULIA (Dynamic W-slice morphing driven by audio bass)
+    float deQuaternionJulia(vec3 p, out vec4 trap) {
+      float audioW = u_sliceW + u_audioBass * 0.45;
+      vec4 q = vec4(p, audioW);
+      vec4 c = vec4(-0.16, 0.62, 0.24, -0.34);
+      vec4 qp = vec4(1.0, 0.0, 0.0, 0.0);
+      trap = vec4(1e10);
+
+      for (int i = 0; i < 30; i++) {
+        if (i >= u_maxIter) break;
+        float r2 = dot(q, q);
+        trap.xyz = min(trap.xyz, abs(q.xyz));
+        trap.w = min(trap.w, r2);
+        if (r2 > 5.0) break;
+
+        qp = 2.0 * vec4(
+          q.w * qp.x + q.x * qp.w + q.y * qp.z - q.z * qp.y,
+          q.w * qp.y - q.x * qp.z + q.y * qp.w + q.z * qp.x,
+          q.w * qp.z + q.x * qp.y - q.y * qp.x + q.z * qp.w,
+          q.w * qp.w - q.x * qp.x - q.y * qp.y - q.z * qp.z
+        );
+
+        q = vec4(
+          2.0 * q.w * q.xyz,
+          q.w * q.w - dot(q.xyz, q.xyz)
+        ) + c;
+      }
+      float r = length(q);
+      return 0.5 * log(max(r, 1.0001)) * r / max(length(qp), 1e-6);
+    }
+
+    // 3. CLASSIC MANDELBULB (Power 8)
+    float deMandelbulb(vec3 p, out vec4 trap) {
+      float audioW = u_sliceW + u_audioBass * 0.35;
+      vec3 w = p + vec3(0.0, 0.0, audioW * 0.25);
+      float dz = 1.0;
+      trap = vec4(1e10);
+      float effPower = u_power + u_audioBass * 0.2;
+
+      for (int i = 0; i < 30; i++) {
+        if (i >= u_maxIter) break;
+        float r = length(w);
+        trap.xyz = min(trap.xyz, abs(w));
+        trap.w = min(trap.w, r);
+        if (r > 4.0) break;
+
+        float theta = acos(clamp(w.z / max(r, 1e-6), -1.0, 1.0));
+        float phi = atan(w.y, w.x);
+
+        dz = pow(r, effPower - 1.0) * effPower * dz + 1.0;
+        float rPow = pow(r, effPower);
+        theta = theta * effPower;
+        phi = phi * effPower;
+
+        w = rPow * vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)) + p;
+      }
+      float r = length(w);
+      return 0.5 * log(max(r, 1.0001)) * r / max(dz, 1e-6);
+    }
+
+    // 4. APOLLONIAN GASKET / SPHERICAL SPONGE
+    float deApollonian(vec3 p, out vec4 trap) {
+      float audioW = u_sliceW + u_audioBass * 0.3;
+      vec3 z = p + vec3(0.0, 0.0, audioW * 0.15);
+      float s = 1.0;
+      trap = vec4(1e10);
+
+      for (int i = 0; i < 24; i++) {
+        if (i >= u_maxIter) break;
+
+        z = abs(z);
+        if (z.x < z.y) z.xy = z.yx;
+        if (z.x < z.z) z.xz = z.zx;
+        if (z.y < z.z) z.yz = z.zy;
+
+        float r2 = dot(z, z);
+        trap.xyz = min(trap.xyz, abs(z));
+        trap.w = min(trap.w, r2);
+
+        if (r2 < 0.35) {
+          float k = 1.0 / 0.35;
+          z *= k; s *= k;
+        } else if (r2 < 1.0) {
+          float k = 1.0 / r2;
+          z *= k; s *= k;
+        }
+
+        z = z * 2.6 - vec3(1.6, 1.6, 0.0);
+        s = s * 2.6 + 1.0;
+        if (z.z < -0.8) z.z += 1.6;
+      }
+
+      float cubeDist = length(max(abs(z) - vec3(1.0), 0.0));
+      float sphereDist = length(z) - 0.45;
+      return max(cubeDist - 0.25, -sphereDist * 0.8) / s;
+    }
+
+    // Master Scene Distance Function
+    float mapScene(vec3 p, out vec4 trap) {
+      if (u_equation == 0) return deMandelbox(p, trap);
+      if (u_equation == 1) return deQuaternionJulia(p, trap);
+      if (u_equation == 2) return deMandelbulb(p, trap);
+      return deApollonian(p, trap);
+    }
+
+    // Dynamic Finite-Difference Normal Tuning (t * epsilon)
+    vec3 calcNormal(vec3 p, float t) {
+      float eps = max(0.00004, t * 0.00035);
+      vec2 e = vec2(1.0, -1.0) * 0.5773 * eps;
+      vec4 tr;
+      return normalize(
+        e.xyy * mapScene(p + e.xyy, tr) +
+        e.yyx * mapScene(p + e.yyx, tr) +
+        e.yxy * mapScene(p + e.yxy, tr) +
+        e.xxx * mapScene(p + e.xxx, tr)
+      );
+    }
+
+    // Volumetric Crevice Ambient Occlusion (5-Tap)
+    float calcAO(vec3 p, vec3 n) {
+      if (u_aoIntensity <= 0.01) return 1.0;
+      float occ = 0.0;
+      float sca = 1.0;
+      vec4 tr;
+      for (int i = 0; i < 5; i++) {
+        float h = 0.012 + 0.14 * float(i) / 4.0;
+        float d = mapScene(p + h * n, tr);
+        occ += (h - d) * sca;
+        sca *= 0.76;
+      }
+      return clamp(1.0 - u_aoIntensity * occ, 0.0, 1.0);
+    }
+
+    // Analytical Soft Penumbra Shadows (IQ Formula)
+    float calcSoftShadow(vec3 ro, vec3 rd, float mint, float maxt, float k) {
+      float res = 1.0;
+      float t = mint;
+      vec4 tr;
+      float ph = 1e10;
+      for (int i = 0; i < 32; i++) {
+        if (t >= maxt) break;
+        float h = mapScene(ro + rd * t, tr);
+        if (h < 0.0004) return 0.0;
+        float y = h * h / (2.0 * ph);
+        float d = sqrt(max(0.0, h * h - y * y));
+        res = min(res, k * d / max(0.0001, t - y));
+        ph = h;
+        t += clamp(h, 0.012, 0.25);
+      }
+      return clamp(res, 0.0, 1.0);
+    }
+
+    // Palette Color Function
+    vec3 getBaseColor(float t) {
+      t = fract(t * 1.6);
+      if (u_palette == 0) { // Chrome Metropolis
+        return mix(vec3(0.65, 0.70, 0.78), vec3(0.92, 0.95, 1.0), t);
+      } else if (u_palette == 1) { // Neon Cyber-Tesseract
+        return mix(vec3(0.0, 0.94, 1.0), vec3(1.0, 0.0, 0.5), t);
+      } else if (u_palette == 2) { // Liquid Gold Monolith
+        return mix(vec3(0.12, 0.08, 0.04), vec3(0.95, 0.75, 0.2), pow(t, 0.7));
+      } else { // Deep Bioluminescence
+        return mix(vec3(0.04, 0.15, 0.18), vec3(0.1, 0.95, 0.65), t);
+      }
+    }
+
+    void main() {
+      // Progressive Temporal Supersampling (Subpixel Halton Jitter)
+      vec2 subJitter = u_useTemporalAA ? u_subpixelJitter : vec2(0.0);
+      vec2 p = (gl_FragCoord.xy + subJitter - 0.5 * u_resolution) / u_resolution.y;
+
+      // Look-At Matrix Camera
+      vec3 ro = u_camPos;
+      vec3 ta = u_camTarget;
+      vec3 ww = normalize(ta - ro);
+      vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
+      vec3 vv = cross(uu, ww);
+
+      float fovFactor = tan(radians(u_fov * 0.5));
+      vec3 rd = normalize(p.x * uu * fovFactor + p.y * vv * fovFactor + ww);
+
+      // Analytical Bounding Sphere Early-Exit
+      float tEnter = 0.02;
+      float tExit = 32.0;
+
+      if (u_useBoundingSphere) {
+        float boundingRadius = (u_equation == 0) ? 3.4 : ((u_equation == 3) ? 3.0 : 2.5);
+        bool hitBound = intersectSphere(ro, rd, boundingRadius, tEnter, tExit);
+        if (!hitBound) {
+          vec3 bgCol = getStudioHDRI(rd, 0.8);
+          vec3 currentFrameCol = bgCol;
+          if (u_useTemporalAA && u_frame > 0) {
+            vec3 prevCol = texture(u_prevFrame, v_uv).rgb;
+            currentFrameCol = mix(prevCol, currentFrameCol, 1.0 / float(u_frame + 1));
+          }
+          fragColor = vec4(currentFrameCol, 1.0);
+          return;
+        }
+      }
+
+      // Raymarching Variables
+      float t = tEnter;
+      float tMax = min(tExit, 32.0);
+      vec4 trap = vec4(0.0);
+      vec4 hitTrap = vec4(0.0);
+      bool hit = false;
+      vec3 coreGlowAcc = vec3(0.0);
+      vec3 godRayAcc = vec3(0.0);
+
+      vec3 sunDir = normalize(vec3(1.2, 1.4, 0.9));
+      vec3 emissiveHue = getBaseColor(0.2 + 0.1 * sin(u_time * 0.35));
+
+      // Audio reactivity: Mid and High driving vein and circuit energy
+      float audioVeinGlow = (u_audioMid * 1.5 + u_audioHigh * 2.2);
+
+      // Raymarching Loop
+      for (int i = 0; i < 160; i++) {
+        if (i >= u_maxSteps) break;
+        if (t > tMax) break;
+
+        vec3 pos = ro + rd * t;
+        float d = mapScene(pos, trap);
+
+        // Volumetric Crevice Glow & Dust Haze
+        float glowWeight = exp(-d * 8.5);
+        coreGlowAcc += glowWeight * emissiveHue * (0.016 * u_edgeGlow);
+
+        // Volumetric Dust Haze / God-Ray accumulation inside hollow crevices
+        if (u_godRayIntensity > 0.01 && (i % 3 == 0)) {
+          float sunSha = calcSoftShadow(pos + sunDir * 0.015, sunDir, 0.02, 3.5, u_shadowSoftness);
+          float cosTheta = dot(rd, sunDir);
+          float mie = 0.25 * (1.0 - 0.5 * 0.5) / pow(1.25 - 1.0 * cosTheta, 1.5);
+          float creviceHaze = exp(-d * 3.5);
+          godRayAcc += (sunSha * mie * vec3(1.15, 1.05, 0.9) + creviceHaze * emissiveHue * 0.4) * (0.015 * u_godRayIntensity);
+        }
+
+        float hitThreshold = 0.00055 * t;
+        if (d < hitThreshold) {
+          hit = true;
+          hitTrap = trap;
+          break;
+        }
+
+        t += max(d * u_stepMultiplier, 0.00035 * t);
+      }
+
+      // Studio HDRI Background
+      vec3 col = getStudioHDRI(rd, 0.8);
+
+      if (hit) {
+        vec3 pos = ro + rd * t;
+        vec3 nor = calcNormal(pos, t);
+
+        vec3 fillDir = normalize(vec3(-1.5, 0.7, -1.1));
+        vec3 ref = reflect(rd, nor);
+
+        // Multi-Channel Orbit Trap Surface Mapping
+        vec3 planeTrap = hitTrap.xyz;
+        vec3 grid = abs(fract(planeTrap * 14.0) - 0.5);
+        float circuitTrace = smoothstep(0.06, 0.01, min(grid.x, min(grid.y, grid.z)));
+        float circuitNode = smoothstep(0.12, 0.04, length(grid - 0.5));
+
+        // Biomechanical Vein Pattern
+        float veinPattern = sin(planeTrap.x * 22.0 + sin(planeTrap.y * 18.0)) * cos(planeTrap.z * 22.0);
+        veinPattern = smoothstep(0.25, 0.85, veinPattern * 0.5 + 0.5);
+
+        float sphereTrap = sqrt(abs(hitTrap.w));
+        vec3 baseMat = getBaseColor(sphereTrap);
+
+        // Metallic Circuit-Board Texture
+        vec3 circuitMat = mix(vec3(0.04, 0.06, 0.1), vec3(0.0, 0.94, 1.0), circuitTrace);
+        circuitMat += vec3(1.0, 0.8, 0.2) * circuitNode * (1.5 + audioVeinGlow);
+        vec3 finalSurface = mix(baseMat, circuitMat, u_circuitMix);
+
+        // Biomechanical Vein Glow driven by mid/high frequencies
+        vec3 veinColor = (u_palette == 2) ? vec3(1.0, 0.85, 0.3) : vec3(0.95, 0.1, 0.45);
+        veinColor *= (1.0 + audioVeinGlow * 1.5);
+        finalSurface = mix(finalSurface, veinColor, veinPattern * u_veinMix * (1.0 + audioVeinGlow * 0.8));
+
+        // Lighting & Analytical Soft Penumbra Shadows
+        float dif = clamp(dot(nor, sunDir), 0.0, 1.0);
+        float fillDif = clamp(dot(nor, fillDir), 0.0, 1.0) * 0.4;
+        float amb = 0.5 + 0.5 * nor.y;
+
+        float sha = calcSoftShadow(pos + nor * 0.002, sunDir, 0.01, 7.0, u_shadowSoftness);
+        float ao = calcAO(pos, nor);
+
+        // Blinn-Phong Specular & Fresnel Rim-Lighting
+        vec3 hal = normalize(sunDir - rd);
+        float spe = pow(clamp(dot(nor, hal), 0.0, 1.0), 54.0) * u_specular * (1.0 + u_audioHigh * 1.2);
+        float fre = pow(clamp(1.0 + dot(rd, nor), 0.0, 1.0), 4.0) * u_fresnel;
+
+        vec3 lin = vec3(0.0);
+        lin += dif * vec3(1.2, 1.12, 0.98) * sha;
+        lin += fillDif * vec3(0.4, 0.7, 1.2) * ao;
+        lin += amb * vec3(0.15, 0.2, 0.3) * ao;
+
+        col = finalSurface * lin;
+
+        // Studio HDRI Environment Reflection
+        vec3 studioReflection = getStudioHDRI(ref, 0.1);
+        col += studioReflection * fre * (0.35 + 0.65 * ao);
+        col += spe * sha * vec3(1.2, 1.15, 1.05);
+
+        // Depth Atmospheric Fog
+        float fog = 1.0 - exp(-t * u_fogDensity);
+        col = mix(col, getStudioHDRI(rd, 0.8), fog);
+      }
+
+      // Add Emissive Core Glow & God Rays
+      col += coreGlowAcc;
+      col += godRayAcc;
+
+      // Lens Vignette
+      vec2 q = v_uv;
+      col *= 0.5 + 0.5 * pow(16.0 * q.x * q.y * (1.0 - q.x) * (1.0 - q.y), 0.22);
+
+      // Subtle Lens Chromatic Aberration on High-Contrast Edges
+      if (u_chromaAberration > 0.01) {
+        float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+        float edgeContrast = length(dFdx(lum)) + length(dFdy(lum));
+        float chromaShift = (length(p) * 0.005 + edgeContrast * 0.014) * u_chromaAberration;
+        col.r = mix(col.r, col.r + chromaShift, clamp(edgeContrast * 2.5, 0.0, 1.0));
+        col.b = mix(col.b, col.b - chromaShift, clamp(edgeContrast * 2.5, 0.0, 1.0));
+      }
+
+      // ACES Filmic Tonemapping + Gamma 2.2
+      col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
+      col = pow(clamp(col, 0.0, 1.0), vec3(1.0 / 2.2));
+
+      // Progressive Temporal Supersampling (MSAA Blend)
+      vec3 finalCol = col;
+      if (u_useTemporalAA && u_frame > 0) {
+        vec3 prevCol = texture(u_prevFrame, v_uv).rgb;
+        finalCol = mix(prevCol, col, 1.0 / float(u_frame + 1));
+      }
+
+      fragColor = vec4(finalCol, 1.0);
+    }
+  </script>
+
+  <!-- Engine Controller Script -->
+  <script>
+    (function() {
+      'use strict';
+
+      const canvas = document.getElementById('viewport');
+      const gl = canvas.getContext('webgl2', {
+        powerPreference: 'high-performance',
+        antialias: false,
+        preserveDrawingBuffer: true
+      });
+
+      if (!gl) {
+        alert('WebGL 2.0 is required for this Hyper-Fractal engine.');
+        return;
+      }
+
+      function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source.trim());
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
+        }
+        return shader;
+      }
+
+      const vs = createShader(gl, gl.VERTEX_SHADER, document.getElementById('vs').text);
+      const fs = createShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fs').text);
+      const program = gl.createProgram();
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error('Program Link Error:', gl.getProgramInfoLog(program));
+        return;
+      }
+
+      // Fullscreen Quad Buffer
+      const posBuf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1,  1, -1, -1,  1,
+        -1,  1,  1, -1,  1,  1
+      ]), gl.STATIC_DRAW);
+
+      const aPos = gl.getAttribLocation(program, 'a_position');
+      const vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+      gl.enableVertexAttribArray(aPos);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+      // Locate Uniforms
+      const uLoc = {
+        resolution: gl.getUniformLocation(program, 'u_resolution'),
+        camPos: gl.getUniformLocation(program, 'u_camPos'),
+        camTarget: gl.getUniformLocation(program, 'u_camTarget'),
+        fov: gl.getUniformLocation(program, 'u_fov'),
+        time: gl.getUniformLocation(program, 'u_time'),
+        subpixelJitter: gl.getUniformLocation(program, 'u_subpixelJitter'),
+        frame: gl.getUniformLocation(program, 'u_frame'),
+        prevFrame: gl.getUniformLocation(program, 'u_prevFrame'),
+        useTemporalAA: gl.getUniformLocation(program, 'u_useTemporalAA'),
+        equation: gl.getUniformLocation(program, 'u_equation'),
+        power: gl.getUniformLocation(program, 'u_power'),
+        maxIter: gl.getUniformLocation(program, 'u_maxIter'),
+        scale: gl.getUniformLocation(program, 'u_scale'),
+        sliceW: gl.getUniformLocation(program, 'u_sliceW'),
+        useBoundingSphere: gl.getUniformLocation(program, 'u_useBoundingSphere'),
+        palette: gl.getUniformLocation(program, 'u_palette'),
+        circuitMix: gl.getUniformLocation(program, 'u_circuitMix'),
+        veinMix: gl.getUniformLocation(program, 'u_veinMix'),
+        specular: gl.getUniformLocation(program, 'u_specular'),
+        fresnel: gl.getUniformLocation(program, 'u_fresnel'),
+        aoIntensity: gl.getUniformLocation(program, 'u_aoIntensity'),
+        edgeGlow: gl.getUniformLocation(program, 'u_edgeGlow'),
+        stepMultiplier: gl.getUniformLocation(program, 'u_stepMultiplier'),
+        maxSteps: gl.getUniformLocation(program, 'u_maxSteps'),
+        shadowSoftness: gl.getUniformLocation(program, 'u_shadowSoftness'),
+        godRayIntensity: gl.getUniformLocation(program, 'u_godRayIntensity'),
+        fogDensity: gl.getUniformLocation(program, 'u_fogDensity'),
+        chromaAberration: gl.getUniformLocation(program, 'u_chromaAberration'),
+        audioBass: gl.getUniformLocation(program, 'u_audioBass'),
+        audioMid: gl.getUniformLocation(program, 'u_audioMid'),
+        audioHigh: gl.getUniformLocation(program, 'u_audioHigh')
+      };
+
+      // Progressive Temporal MSAA Buffers
+      let fboPing = null, fboPong = null;
+      let texPing = null, texPong = null;
+      let currentPingPong = 0;
+      let temporalFrame = 0;
+
+      function createPingPongFBO(w, h) {
+        if (fboPing) gl.deleteFramebuffer(fboPing);
+        if (fboPong) gl.deleteFramebuffer(fboPong);
+        if (texPing) gl.deleteTexture(texPing);
+        if (texPong) gl.deleteTexture(texPong);
+
+        function makeTex() {
+          const t = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, t);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          return t;
+        }
+
+        texPing = makeTex();
+        texPong = makeTex();
+        fboPing = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fboPing);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texPing, 0);
+
+        fboPong = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fboPong);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texPong, 0);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      }
+
+      function halton(index, base) {
+        let result = 0, f = 1 / base, i = index;
+        while (i > 0) {
+          result += f * (i % base);
+          i = Math.floor(i / base);
+          f /= base;
+        }
+        return result;
+      }
+
+      // Engine State
+      const state = {
+        equation: 0,
+        power: 8.0,
+        scale: -2.2,
+        maxIter: 18,
+        maxSteps: 112,
+        stepMultiplier: 0.65,
+        sliceW: 0.0,
+        autoMorph: false,
+        useBoundingSphere: true,
+        useTemporalAA: true,
+        palette: 0,
+        circuitMix: 0.75,
+        veinMix: 0.60,
+        specular: 1.50,
+        fresnel: 1.20,
+        aoIntensity: 1.40,
+        edgeGlow: 1.00,
+        shadowSoftness: 14.0,
+        godRayIntensity: 0.90,
+        fogDensity: 0.06,
+        chromaAberration: 0.85,
+        // Audio
+        audioBassWeight: 1.6,
+        audioVeinWeight: 1.8,
+        // Camera, Drone & Autopilot
+        camMode: 0, // 0: Orbit, 1: Drone
+        flySpeed: 1.2,
+        fov: 65,
+        camDist: 3.2,
+        camPitch: 0.25,
+        camYaw: 0.75,
+        camTarget: [0, 0, 0],
+        dronePos: [0, 0.4, 3.2],
+        dronePitch: 0.0,
+        droneYaw: 0.0,
+        tourActive: false,
+        tourSpeed: 1.0,
+        useHaptics: true,
+        useGyro: false,
+        gyroPitch: 0,
+        gyroYaw: 0,
+        animating: true,
+        keys: {}
+      };
+
+      // Presets Bank
+      const presets = {
+        'chrome-metropolis': {
+          equation: 0, scale: -2.2, sliceW: 0.1, autoMorph: false, palette: 0,
+          circuitMix: 0.85, veinMix: 0.35, specular: 1.8, fresnel: 1.4, aoIntensity: 1.4,
+          edgeGlow: 0.7, godRayIntensity: 0.7, camDist: 3.2, camPitch: 0.3, camYaw: 0.85
+        },
+        'neon-tesseract': {
+          equation: 1, sliceW: 0.25, autoMorph: true, palette: 1,
+          circuitMix: 0.90, veinMix: 0.70, specular: 1.4, fresnel: 1.5, aoIntensity: 1.5,
+          edgeGlow: 1.6, godRayIntensity: 1.1, camDist: 2.3, camPitch: 0.2, camYaw: 1.2
+        },
+        'liquid-gold': {
+          equation: 2, power: 8.0, sliceW: 0.0, autoMorph: false, palette: 2,
+          circuitMix: 0.45, veinMix: 0.80, specular: 2.2, fresnel: 1.3, aoIntensity: 1.6,
+          edgeGlow: 1.1, godRayIntensity: 1.2, camDist: 2.6, camPitch: 0.25, camYaw: 0.75
+        },
+        'deep-bioluminescence': {
+          equation: 3, scale: 2.0, sliceW: 0.0, autoMorph: false, palette: 3,
+          circuitMix: 0.65, veinMix: 0.90, specular: 1.3, fresnel: 1.1, aoIntensity: 1.7,
+          edgeGlow: 1.8, godRayIntensity: 0.9, camDist: 2.8, camPitch: 0.35, camYaw: 0.6
+        }
+      };
+
+      // UI Elements
+      const el = {
+        selEquation: document.getElementById('sel-equation'),
+        labelEqName: document.getElementById('label-eq-name'),
+        statusEqDisplay: document.getElementById('status-eq-display'),
+        rowPower: document.getElementById('row-power'),
+        paramPower: document.getElementById('param-power'),
+        valPower: document.getElementById('val-power'),
+        rowScale: document.getElementById('row-scale'),
+        paramScale: document.getElementById('param-scale'),
+        valScale: document.getElementById('val-scale'),
+        paramSliceW: document.getElementById('param-slice-w'),
+        valSliceW: document.getElementById('val-slice-w'),
+        toggleAutoMorph: document.getElementById('toggle-auto-morph'),
+        paramShadowSoftness: document.getElementById('param-shadow-softness'),
+        valShadowSoftness: document.getElementById('val-shadow-softness'),
+        paramAoIntensity: document.getElementById('param-ao-intensity'),
+        valAoIntensity: document.getElementById('val-ao-intensity'),
+        paramGodRays: document.getElementById('param-god-rays'),
+        valGodRays: document.getElementById('val-god-rays'),
+        paramFogDensity: document.getElementById('param-fog-density'),
+        valFogDensity: document.getElementById('val-fog-density'),
+        paramEdgeGlow: document.getElementById('param-edge-glow'),
+        valEdgeGlow: document.getElementById('val-edge-glow'),
+        paramChroma: document.getElementById('param-chroma'),
+        valChroma: document.getElementById('val-chroma'),
+        paramSpecular: document.getElementById('param-specular'),
+        valSpecular: document.getElementById('val-specular'),
+        btnToggleMic: document.getElementById('btn-toggle-mic'),
+        btnMicToggle: document.getElementById('btn-mic-toggle'),
+        micIcon: document.getElementById('mic-icon'),
+        btnToggleSynth: document.getElementById('btn-toggle-synth'),
+        audioVisCanvas: document.getElementById('audio-vis-canvas'),
+        paramAudioBass: document.getElementById('param-audio-bass'),
+        valAudioBass: document.getElementById('val-audio-bass'),
+        paramAudioVein: document.getElementById('param-audio-vein'),
+        valAudioVein: document.getElementById('val-audio-vein'),
+        toggleHaptics: document.getElementById('toggle-haptics'),
+        toggleGyro: document.getElementById('toggle-gyro'),
+        paramTourSpeed: document.getElementById('param-tour-speed'),
+        valTourSpeed: document.getElementById('val-tour-speed'),
+        paramFov: document.getElementById('param-fov'),
+        valFov: document.getElementById('val-fov'),
+        btnTour: document.getElementById('btn-tour'),
+        tourIcon: document.getElementById('tour-icon'),
+        btnCamMode: document.getElementById('btn-cam-mode'),
+        camModeIcon: document.getElementById('cam-mode-icon'),
+        camModeLabel: document.getElementById('cam-mode-label'),
+        btnSnapshot4k: document.getElementById('btn-snapshot-4k'),
+        btnToggleHud: document.getElementById('btn-toggle-hud'),
+        hudPanel: document.getElementById('hud-panel'),
+        btnResetCam: document.getElementById('btn-reset-cam'),
+        btnHelp: document.getElementById('btn-help'),
+        helpModal: document.getElementById('help-modal'),
+        btnCloseModal: document.getElementById('btn-close-modal'),
+        toast: document.getElementById('toast'),
+        fpsDisplay: document.getElementById('fps-display'),
+        msaaSamples: document.getElementById('msaa-samples'),
+        resModeDisplay: document.getElementById('res-mode-display'),
+        statusDot: document.getElementById('status-dot'),
+        joystickContainer: document.getElementById('joystick-container'),
+        joystickStick: document.getElementById('joystick-stick'),
+        altitudeControls: document.getElementById('altitude-controls'),
+        btnAltUp: document.getElementById('btn-alt-up'),
+        btnAltDown: document.getElementById('btn-alt-down')
+      };
+
+      const eqNames = ['Mandelbox', '4D Julia', 'Mandelbulb', 'Apollonian'];
+
+      function showToast(msg) {
+        el.toast.textContent = msg;
+        el.toast.classList.add('show');
+        setTimeout(() => el.toast.classList.remove('show'), 2200);
+      }
+
+      function resetTemporalAccumulation() {
+        temporalFrame = 0;
+        markInteraction();
+      }
+
+      function syncUI() {
+        el.selEquation.value = state.equation;
+        const name = eqNames[state.equation] || '';
+        el.labelEqName.textContent = name.toUpperCase();
+        el.statusEqDisplay.textContent = name;
+
+        el.rowPower.style.display = (state.equation === 2) ? 'block' : 'none';
+        el.rowScale.style.display = (state.equation === 0 || state.equation === 3) ? 'block' : 'none';
+
+        el.paramPower.value = state.power;
+        el.valPower.textContent = Number(state.power).toFixed(2);
+        el.paramScale.value = state.scale;
+        el.valScale.textContent = Number(state.scale).toFixed(2);
+        el.paramSliceW.value = state.sliceW;
+        el.valSliceW.textContent = Number(state.sliceW).toFixed(2);
+        el.toggleAutoMorph.checked = state.autoMorph;
+
+        el.paramShadowSoftness.value = state.shadowSoftness;
+        el.valShadowSoftness.textContent = Number(state.shadowSoftness).toFixed(1);
+        el.paramAoIntensity.value = state.aoIntensity;
+        el.valAoIntensity.textContent = Number(state.aoIntensity).toFixed(2);
+        el.paramGodRays.value = state.godRayIntensity;
+        el.valGodRays.textContent = Number(state.godRayIntensity).toFixed(2);
+        el.paramFogDensity.value = state.fogDensity;
+        el.valFogDensity.textContent = Number(state.fogDensity).toFixed(2);
+        el.paramEdgeGlow.value = state.edgeGlow;
+        el.valEdgeGlow.textContent = Number(state.edgeGlow).toFixed(2);
+        el.paramChroma.value = state.chromaAberration;
+        el.valChroma.textContent = Number(state.chromaAberration).toFixed(2);
+        el.paramSpecular.value = state.specular;
+        el.valSpecular.textContent = Number(state.specular).toFixed(2);
+
+        el.paramAudioBass.value = state.audioBassWeight;
+        el.valAudioBass.textContent = Number(state.audioBassWeight).toFixed(2);
+        el.paramAudioVein.value = state.audioVeinWeight;
+        el.valAudioVein.textContent = Number(state.audioVeinWeight).toFixed(2);
+
+        el.toggleHaptics.checked = state.useHaptics;
+        el.toggleGyro.checked = state.useGyro;
+        el.paramTourSpeed.value = state.tourSpeed;
+        el.valTourSpeed.textContent = `${Number(state.tourSpeed).toFixed(2)}x`;
+        el.paramFov.value = state.fov;
+        el.valFov.textContent = `${state.fov}°`;
+
+        el.camModeLabel.textContent = (state.camMode === 0) ? 'Orbit' : 'Drone';
+        el.camModeIcon.textContent = (state.camMode === 0) ? '🛰️' : '🛸';
+        el.btnCamMode.classList.toggle('active', state.camMode === 1);
+
+        el.joystickContainer.style.display = (state.camMode === 1) ? 'block' : 'none';
+        el.altitudeControls.style.display = (state.camMode === 1) ? 'flex' : 'none';
+      }
+
+      function applyPreset(presetKey) {
+        const p = presets[presetKey];
+        if (!p) return;
+        Object.assign(state, p);
+        syncUI();
+        document.querySelectorAll('.preset-pill').forEach(pill => {
+          pill.classList.toggle('active', pill.getAttribute('data-preset') === presetKey);
+        });
+        resetTemporalAccumulation();
+        showToast(`Preset: ${presetKey.replace(/-/g, ' ').toUpperCase()}`);
+      }
+
+      document.querySelectorAll('.preset-pill').forEach(pill => {
+        pill.addEventListener('click', () => applyPreset(pill.getAttribute('data-preset')));
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+          btn.classList.add('active');
+          const pane = document.getElementById(btn.getAttribute('data-tab'));
+          if (pane) pane.style.display = 'block';
+        });
+      });
+
+      // UI Listeners
+      el.selEquation.addEventListener('change', e => {
+        state.equation = parseInt(e.target.value, 10);
+        state.camDist = (state.equation === 0 ? 3.2 : (state.equation === 1 ? 2.3 : 2.6));
+        syncUI();
+        resetTemporalAccumulation();
+      });
+      el.paramPower.addEventListener('input', e => {
+        state.power = parseFloat(e.target.value);
+        el.valPower.textContent = state.power.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.paramScale.addEventListener('input', e => {
+        state.scale = parseFloat(e.target.value);
+        el.valScale.textContent = state.scale.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.paramSliceW.addEventListener('input', e => {
+        state.sliceW = parseFloat(e.target.value);
+        el.valSliceW.textContent = state.sliceW.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.toggleAutoMorph.addEventListener('change', e => {
+        state.autoMorph = e.target.checked;
+        resetTemporalAccumulation();
+      });
+
+      el.paramShadowSoftness.addEventListener('input', e => {
+        state.shadowSoftness = parseFloat(e.target.value);
+        el.valShadowSoftness.textContent = state.shadowSoftness.toFixed(1);
+        resetTemporalAccumulation();
+      });
+      el.paramAoIntensity.addEventListener('input', e => {
+        state.aoIntensity = parseFloat(e.target.value);
+        el.valAoIntensity.textContent = state.aoIntensity.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.paramGodRays.addEventListener('input', e => {
+        state.godRayIntensity = parseFloat(e.target.value);
+        el.valGodRays.textContent = state.godRayIntensity.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.paramFogDensity.addEventListener('input', e => {
+        state.fogDensity = parseFloat(e.target.value);
+        el.valFogDensity.textContent = state.fogDensity.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.paramEdgeGlow.addEventListener('input', e => {
+        state.edgeGlow = parseFloat(e.target.value);
+        el.valEdgeGlow.textContent = state.edgeGlow.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.paramChroma.addEventListener('input', e => {
+        state.chromaAberration = parseFloat(e.target.value);
+        el.valChroma.textContent = state.chromaAberration.toFixed(2);
+        resetTemporalAccumulation();
+      });
+      el.paramSpecular.addEventListener('input', e => {
+        state.specular = parseFloat(e.target.value);
+        el.valSpecular.textContent = state.specular.toFixed(2);
+        resetTemporalAccumulation();
+      });
+
+      el.paramAudioBass.addEventListener('input', e => {
+        state.audioBassWeight = parseFloat(e.target.value);
+        el.valAudioBass.textContent = state.audioBassWeight.toFixed(2);
+      });
+      el.paramAudioVein.addEventListener('input', e => {
+        state.audioVeinWeight = parseFloat(e.target.value);
+        el.valAudioVein.textContent = state.audioVeinWeight.toFixed(2);
+      });
+
+      el.toggleHaptics.addEventListener('change', e => {
+        state.useHaptics = e.target.checked;
+        showToast(state.useHaptics ? 'Collision Haptics Active' : 'Haptics Muted');
+      });
+      el.toggleGyro.addEventListener('change', e => {
+        state.useGyro = e.target.checked;
+        if (state.useGyro) {
+          if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().then(res => {
+              if (res === 'granted') {
+                window.addEventListener('deviceorientation', handleGyro);
+                showToast('Gyro Flight Tilt Active');
+              } else {
+                state.useGyro = false;
+                el.toggleGyro.checked = false;
+                showToast('Gyro Permission Denied');
+              }
+            }).catch(console.error);
+          } else {
+            window.addEventListener('deviceorientation', handleGyro);
+            showToast('Gyro Flight Tilt Active');
+          }
+        } else {
+          window.removeEventListener('deviceorientation', handleGyro);
+          state.gyroPitch = 0; state.gyroYaw = 0;
+        }
+      });
+
+      function handleGyro(e) {
+        if (!state.useGyro) return;
+        if (e.beta !== null && e.gamma !== null) {
+          state.gyroPitch = (e.beta - 45) * 0.015;
+          state.gyroYaw = e.gamma * 0.015;
+          resetTemporalAccumulation();
+        }
+      }
+
+      el.paramTourSpeed.addEventListener('input', e => {
+        state.tourSpeed = parseFloat(e.target.value);
+        el.valTourSpeed.textContent = `${state.tourSpeed.toFixed(2)}x`;
+      });
+      el.paramFov.addEventListener('input', e => {
+        state.fov = parseFloat(e.target.value);
+        el.valFov.textContent = `${state.fov}°`;
+        resetTemporalAccumulation();
+      });
+
+      // Dual Camera Mode Switch
+      function toggleCamMode() {
+        state.camMode = (state.camMode === 0) ? 1 : 0;
+        if (state.camMode === 1) {
+          const cx = state.camTarget[0] + state.camDist * Math.cos(state.camPitch) * Math.sin(state.camYaw);
+          const cy = state.camTarget[1] + state.camDist * Math.sin(state.camPitch);
+          const cz = state.camTarget[2] + state.camDist * Math.cos(state.camPitch) * Math.cos(state.camYaw);
+          state.dronePos = [cx, cy, cz];
+          state.dronePitch = -state.camPitch;
+          state.droneYaw = state.camYaw + Math.PI;
+          showToast('Mode: 6-DOF Drone Flight');
+        } else {
+          showToast('Mode: Spherical Orbit Camera');
+        }
+        syncUI();
+        resetTemporalAccumulation();
+      }
+      el.btnCamMode.addEventListener('click', toggleCamMode);
+
+      // 1-Tap Cinematic Autopilot (Interior Spline Curve Tunnels)
+      function toggleTour() {
+        state.tourActive = !state.tourActive;
+        el.btnTour.classList.toggle('active', state.tourActive);
+        el.tourIcon.textContent = state.tourActive ? '🎬' : '▶';
+        showToast(state.tourActive ? '🎬 Cinematic Autopilot (Interior Spline Tunnels)' : 'Autopilot Deactivated');
+        resetTemporalAccumulation();
+      }
+      el.btnTour.addEventListener('click', toggleTour);
+
+      // Fast CPU Distance Estimation for Mobile Proximity Haptics
+      function estimateDistanceAt(p) {
+        let z = [p[0], p[1], p[2]];
+        let dz = 1.0;
+        const scale = state.scale;
+        for (let i = 0; i < 8; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (z[j] > 1.0) z[j] = 2.0 - z[j];
+            else if (z[j] < -1.0) z[j] = -2.0 - z[j];
+          }
+          let r2 = z[0]*z[0] + z[1]*z[1] + z[2]*z[2];
+          if (r2 < 0.25) { z[0] *= 4; z[1] *= 4; z[2] *= 4; dz *= 4; }
+          else if (r2 < 1.0) { z[0] /= r2; z[1] /= r2; z[2] /= r2; dz /= r2; }
+          z[0] = scale * z[0] + p[0];
+          z[1] = scale * z[1] + p[1];
+          z[2] = scale * z[2] + p[2];
+          dz = dz * Math.abs(scale) + 1.0;
+        }
+        return Math.sqrt(z[0]*z[0] + z[1]*z[1] + z[2]*z[2]) / dz;
+      }
+
+      let lastHapticTime = 0;
+      function checkProximityHaptics() {
+        if (!state.useHaptics || state.camMode !== 1 || !('vibrate' in navigator)) return;
+        const dist = estimateDistanceAt(state.dronePos);
+        if (dist < 0.18) {
+          const now = performance.now();
+          if (now - lastHapticTime > (dist < 0.08 ? 120 : 250)) {
+            lastHapticTime = now;
+            navigator.vibrate(dist < 0.08 ? [40, 20, 40] : 25);
+          }
+        }
+      }
+
+      // WEB AUDIO REACTIVITY (MIC + SYNTH)
+      const audio = {
+        ctx: null,
+        analyser: null,
+        synthGain: null,
+        micStream: null,
+        isMic: false,
+        isActive: false,
+        bass: 0,
+        mid: 0,
+        high: 0
+      };
+
+      function initAudioContext() {
+        if (!audio.ctx) {
+          audio.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          audio.analyser = audio.ctx.createAnalyser();
+          audio.analyser.fftSize = 256;
+          audio.analyser.smoothingTimeConstant = 0.8;
+        }
+        if (audio.ctx.state === 'suspended') {
+          audio.ctx.resume();
+        }
+      }
+
+      // 1-Tap Microphone / Audio Toggle
+      async function toggleMicInput() {
+        initAudioContext();
+        try {
+          if (!audio.isMic || !audio.isActive) {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            audio.micStream = stream;
+            const micSource = audio.ctx.createMediaStreamSource(stream);
+            if (audio.synthGain) audio.synthGain.gain.setValueAtTime(0.0001, audio.ctx.currentTime);
+
+            micSource.connect(audio.analyser);
+            audio.isMic = true;
+            audio.isActive = true;
+            el.micIcon.textContent = '🎙️';
+            el.btnMicToggle.classList.add('active');
+            el.btnToggleMic.classList.add('active');
+            el.btnToggleSynth.classList.remove('active');
+            showToast('🎤 Microphone Live: Bass drives 4D-W & Mids drive Veins');
+          } else {
+            if (audio.micStream) {
+              audio.micStream.getTracks().forEach(t => t.stop());
+            }
+            audio.isActive = false;
+            audio.isMic = false;
+            el.micIcon.textContent = '🎤';
+            el.btnMicToggle.classList.remove('active');
+            el.btnToggleMic.classList.remove('active');
+            showToast('Microphone Audio Disconnected');
+          }
+        } catch(err) {
+          console.error(err);
+          showToast('Mic permission denied / unavailable');
+        }
+      }
+      el.btnMicToggle.addEventListener('click', toggleMicInput);
+      el.btnToggleMic.addEventListener('click', toggleMicInput);
+
+      function toggleSynthAudio() {
+        initAudioContext();
+        if (!audio.isActive || audio.isMic) {
+          audio.isMic = false;
+          if (!audio.synthGain) {
+            audio.synthGain = audio.ctx.createGain();
+            audio.synthGain.gain.setValueAtTime(0.12, audio.ctx.currentTime);
+
+            const filter = audio.ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(500, audio.ctx.currentTime);
+            filter.Q.setValueAtTime(4.0, audio.ctx.currentTime);
+
+            const lfo = audio.ctx.createOscillator();
+            const lfoGain = audio.ctx.createGain();
+            lfo.frequency.setValueAtTime(0.1, audio.ctx.currentTime);
+            lfoGain.gain.setValueAtTime(280, audio.ctx.currentTime);
+            lfo.connect(lfoGain);
+            lfoGain.connect(filter.frequency);
+            lfo.start();
+
+            [55.0, 110.0, 164.81, 220.0, 277.18].forEach((f, i) => {
+              const osc = audio.ctx.createOscillator();
+              osc.type = (i === 0) ? 'sine' : 'sawtooth';
+              osc.frequency.setValueAtTime(f + (Math.random() - 0.5) * 0.4, audio.ctx.currentTime);
+              osc.connect(filter);
+              osc.start();
+            });
+
+            filter.connect(audio.synthGain);
+            audio.synthGain.connect(audio.analyser);
+            audio.analyser.connect(audio.ctx.destination);
+          }
+          audio.synthGain.gain.setTargetAtTime(0.12, audio.ctx.currentTime, 0.4);
+          audio.isActive = true;
+          el.btnToggleSynth.classList.add('active');
+          el.btnToggleMic.classList.remove('active');
+          el.btnMicToggle.classList.remove('active');
+          showToast('🌌 Space Drone Synth Online');
+        } else {
+          audio.synthGain.gain.setTargetAtTime(0.0001, audio.ctx.currentTime, 0.3);
+          audio.isActive = false;
+          el.btnToggleSynth.classList.remove('active');
+          showToast('Synth Audio Muted');
+        }
+      }
+      el.btnToggleSynth.addEventListener('click', toggleSynthAudio);
+
+      // Mini Spectrum Visualizer Canvas
+      const visCtx = el.audioVisCanvas.getContext('2d');
+      function drawAudioVisualizer() {
+        const w = el.audioVisCanvas.width = el.audioVisCanvas.clientWidth;
+        const h = el.audioVisCanvas.height = el.audioVisCanvas.clientHeight;
+        visCtx.clearRect(0, 0, w, h);
+
+        if (!audio.isActive || !audio.analyser) {
+          visCtx.fillStyle = 'rgba(0, 240, 255, 0.15)';
+          visCtx.fillRect(0, h - 2, w, 2);
+          return;
+        }
+
+        const data = new Uint8Array(audio.analyser.frequencyBinCount);
+        audio.analyser.getByteFrequencyData(data);
+
+        let b = 0; for (let i = 1; i <= 6; i++) b += data[i]; b /= 6 * 255;
+        let m = 0; for (let i = 7; i <= 26; i++) m += data[i]; m /= 20 * 255;
+        let t = 0; for (let i = 27; i <= 72; i++) t += data[i]; t /= 46 * 255;
+
+        audio.bass += (b - audio.bass) * 0.35;
+        audio.mid += (m - audio.mid) * 0.35;
+        audio.high += (t - audio.high) * 0.35;
+
+        const barWidth = w / 32;
+        for (let i = 0; i < 32; i++) {
+          const val = (data[i * 2] / 255) * h;
+          const grad = visCtx.createLinearGradient(0, h, 0, 0);
+          grad.addColorStop(0, '#00f0ff');
+          grad.addColorStop(1, '#ff007f');
+          visCtx.fillStyle = grad;
+          visCtx.fillRect(i * barWidth, h - val, barWidth - 1, val);
+        }
+      }
+
+      // HUD Toggle
+      function toggleHUD() {
+        el.hudPanel.classList.toggle('hidden-hud');
+        el.btnToggleHud.classList.toggle('active');
+      }
+      el.btnToggleHud.addEventListener('click', toggleHUD);
+
+      let touchStartX = 0;
+      window.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+
+      window.addEventListener('touchend', e => {
+        if (e.changedTouches.length === 1) {
+          const dx = e.changedTouches[0].clientX - touchStartX;
+          if (dx < -70 && !el.hudPanel.classList.contains('hidden-hud')) {
+            toggleHUD();
+          } else if (dx > 70 && el.hudPanel.classList.contains('hidden-hud')) {
+            toggleHUD();
+          }
+        }
+      }, { passive: true });
+
+      // Reset Camera
+      function resetCamera() {
+        state.camDist = (state.equation === 0 ? 3.2 : (state.equation === 1 ? 2.3 : 2.6));
+        state.camPitch = 0.25;
+        state.camYaw = 0.75;
+        state.camTarget = [0, 0, 0];
+        state.dronePos = [0, 0.4, state.camDist];
+        state.dronePitch = 0;
+        state.droneYaw = 0;
+        state.tourActive = false;
+        el.btnTour.classList.remove('active');
+        syncUI();
+        resetTemporalAccumulation();
+        showToast('Camera Reset');
+      }
+      el.btnResetCam.addEventListener('click', resetCamera);
+
+      el.btnHelp.addEventListener('click', () => el.helpModal.classList.add('visible'));
+      el.btnCloseModal.addEventListener('click', () => el.helpModal.classList.remove('visible'));
+
+      // 1-Tap Screenshot (4K Super-Sample PNG Export)
+      function capture4KSuperSample() {
+        showToast('Rendering 4K Super-Sample PNG (3840x2160)...');
+        setTimeout(() => {
+          const targetW = 3840;
+          const targetH = 2160;
+          canvas.width = targetW;
+          canvas.height = targetH;
+          gl.viewport(0, 0, targetW, targetH);
+
+          const origAA = state.useTemporalAA;
+          state.useTemporalAA = false;
+          renderScene(performance.now(), null, 0);
+          state.useTemporalAA = origAA;
+
+          canvas.toBlob(blob => {
+            if (!blob) {
+              showToast('Error exporting snapshot.');
+              resizeCanvas();
+              return;
+            }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `AETHER-4D_${eqNames[state.equation]}_4K_SuperSample_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('📸 4K Super-Sample Screenshot Saved!');
+            resizeCanvas();
+            resetTemporalAccumulation();
+          }, 'image/png');
+        }, 60);
+      }
+      el.btnSnapshot4k.addEventListener('click', capture4KSuperSample);
+
+      // Pointer & Mouse Interaction
+      let isDragging = false, dragButton = 0, lastMouseX = 0, lastMouseY = 0;
+      let isInteracting = false, lastInteractionTime = performance.now();
+
+      function markInteraction() {
+        isInteracting = true;
+        lastInteractionTime = performance.now();
+        temporalFrame = 0;
+      }
+
+      canvas.addEventListener('mousedown', e => {
+        isDragging = true;
+        dragButton = e.button;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        markInteraction();
+      });
+
+      window.addEventListener('contextmenu', e => { if (e.target === canvas) e.preventDefault(); });
+
+      window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        markInteraction();
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+
+        if (state.camMode === 0) {
+          if (dragButton === 0) {
+            state.camYaw -= dx * 0.006;
+            state.camPitch = Math.max(-1.4, Math.min(1.4, state.camPitch + dy * 0.006));
+          } else {
+            const panSpeed = state.camDist * 0.0014;
+            const right = [Math.cos(state.camYaw), 0, -Math.sin(state.camYaw)];
+            state.camTarget[0] -= right[0] * dx * panSpeed;
+            state.camTarget[1] += dy * panSpeed;
+            state.camTarget[2] -= right[2] * dx * panSpeed;
+          }
+        } else {
+          state.droneYaw -= dx * 0.005;
+          state.dronePitch = Math.max(-1.4, Math.min(1.4, state.dronePitch - dy * 0.005));
+        }
+      });
+
+      window.addEventListener('mouseup', () => isDragging = false);
+
+      canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        markInteraction();
+        if (state.camMode === 0) {
+          const factor = Math.exp(e.deltaY * 0.0012);
+          state.camDist = Math.max(0.4, Math.min(12.0, state.camDist * factor));
+        } else {
+          const forward = [
+            Math.cos(state.dronePitch) * Math.sin(state.droneYaw),
+            Math.sin(state.dronePitch),
+            Math.cos(state.dronePitch) * Math.cos(state.droneYaw)
+          ];
+          const speed = -e.deltaY * 0.002 * state.flySpeed;
+          state.dronePos[0] += forward[0] * speed;
+          state.dronePos[1] += forward[1] * speed;
+          state.dronePos[2] += forward[2] * speed;
+        }
+      }, { passive: false });
+
+      // Touch Handling
+      let lastTouchDist = 0, lastTapTime = 0;
+      canvas.addEventListener('touchstart', e => {
+        markInteraction();
+        const now = performance.now();
+        if (e.touches.length === 1) {
+          if (now - lastTapTime < 320) resetCamera();
+          lastTapTime = now;
+          isDragging = true;
+          lastMouseX = e.touches[0].clientX;
+          lastMouseY = e.touches[0].clientY;
+        } else if (e.touches.length === 2) {
+          isDragging = false;
+          lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchmove', e => {
+        markInteraction();
+        if (e.touches.length === 1 && isDragging) {
+          const dx = e.touches[0].clientX - lastMouseX;
+          const dy = e.touches[0].clientY - lastMouseY;
+          lastMouseX = e.touches[0].clientX;
+          lastMouseY = e.touches[0].clientY;
+          if (state.camMode === 0) {
+            state.camYaw -= dx * 0.0075;
+            state.camPitch = Math.max(-1.4, Math.min(1.4, state.camPitch + dy * 0.0075));
+          } else {
+            state.droneYaw -= dx * 0.006;
+            state.dronePitch = Math.max(-1.4, Math.min(1.4, state.dronePitch - dy * 0.006));
+          }
+        } else if (e.touches.length === 2 && lastTouchDist > 0 && state.camMode === 0) {
+          const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          state.camDist = Math.max(0.4, Math.min(12.0, state.camDist * (lastTouchDist / dist)));
+          lastTouchDist = dist;
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchend', () => { isDragging = false; lastTouchDist = 0; });
+
+      // Virtual Joystick (Drone Mode)
+      let joyActive = false, joyCenter = { x:0, y:0 }, joyVec = { x:0, y:0 };
+      el.joystickContainer.addEventListener('touchstart', e => {
+        e.stopPropagation();
+        joyActive = true;
+        const r = el.joystickContainer.getBoundingClientRect();
+        joyCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        updateJoy(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: false });
+
+      window.addEventListener('touchmove', e => {
+        if (!joyActive) return;
+        markInteraction();
+        for (let i = 0; i < e.touches.length; i++) {
+          const t = e.touches[i];
+          if (Math.hypot(t.clientX - joyCenter.x, t.clientY - joyCenter.y) < 140) {
+            updateJoy(t.clientX, t.clientY);
+            break;
+          }
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', () => {
+        if (joyActive) {
+          joyActive = false; joyVec = { x:0, y:0 };
+          el.joystickStick.style.transform = 'translate(0px, 0px)';
+        }
+      });
+
+      function updateJoy(cx, cy) {
+        const dx = cx - joyCenter.x, dy = cy - joyCenter.y;
+        const dist = Math.hypot(dx, dy), maxD = 40;
+        const clamped = Math.min(dist, maxD), a = Math.atan2(dy, dx);
+        const sx = Math.cos(a) * clamped, sy = Math.sin(a) * clamped;
+        el.joystickStick.style.transform = `translate(${sx}px, ${sy}px)`;
+        joyVec = { x: sx / maxD, y: -sy / maxD };
+      }
+
+      let altVel = 0;
+      el.btnAltUp.addEventListener('touchstart', e => { e.stopPropagation(); altVel = 1; markInteraction(); });
+      el.btnAltUp.addEventListener('touchend', () => altVel = 0);
+      el.btnAltDown.addEventListener('touchstart', e => { e.stopPropagation(); altVel = -1; markInteraction(); });
+      el.btnAltDown.addEventListener('touchend', () => altVel = 0);
+
+      // Keyboard Controls
+      window.addEventListener('keydown', e => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        state.keys[e.key.toLowerCase()] = true;
+        markInteraction();
+
+        if (e.key.toLowerCase() === 't') {
+          toggleTour();
+        } else if (e.key.toLowerCase() === 'c') {
+          toggleCamMode();
+        } else if (e.key.toLowerCase() === 'h') {
+          toggleHUD();
+        } else if (e.key.toLowerCase() === 'p') {
+          capture4KSuperSample();
+        } else if (e.key.toLowerCase() === 'r') {
+          resetCamera();
+        } else if (e.key === '?' || e.key === '/') {
+          el.helpModal.classList.toggle('visible');
+        }
+      });
+
+      window.addEventListener('keyup', e => {
+        state.keys[e.key.toLowerCase()] = false;
+      });
+
+      // Update Drone Navigation & Interior Spline Autopilot Trajectory
+      function updateFlightDynamics(dt, now) {
+        // Cinematic Autopilot along interior spline curve through fractal tunnels
+        if (state.tourActive) {
+          const t = now * 0.00028 * state.tourSpeed;
+          // Interior cavern spline path
+          const pX = 0.55 * Math.sin(t * 1.6) * Math.cos(t * 0.7);
+          const pY = 0.22 * Math.sin(t * 2.1);
+          const pZ = 0.55 * Math.cos(t * 1.6) * Math.sin(t * 0.7);
+
+          // Forward look-ahead on spline
+          const dtLook = 0.06;
+          const tNext = t + dtLook;
+          const nextX = 0.55 * Math.sin(tNext * 1.6) * Math.cos(tNext * 0.7);
+          const nextY = 0.22 * Math.sin(tNext * 2.1);
+          const nextZ = 0.55 * Math.cos(tNext * 1.6) * Math.sin(tNext * 0.7);
+
+          state.dronePos = [pX, pY, pZ];
+          state.camTarget = [nextX, nextY, nextZ];
+
+          // Drive camera
+          state.camDist = 1.6 + 0.6 * Math.sin(t * 1.2);
+          state.camYaw = t * 1.8;
+          state.camPitch = 0.2 * Math.cos(t * 0.9);
+
+          resetTemporalAccumulation();
+          return;
+        }
+
+        if (state.camMode !== 1) return;
+
+        const effectivePitch = state.dronePitch + state.gyroPitch;
+        const effectiveYaw = state.droneYaw + state.gyroYaw;
+
+        const forward = [
+          Math.cos(effectivePitch) * Math.sin(effectiveYaw),
+          Math.sin(effectivePitch),
+          Math.cos(effectivePitch) * Math.cos(effectiveYaw)
+        ];
+        const right = [Math.cos(effectiveYaw), 0, -Math.sin(effectiveYaw)];
+        const speed = state.flySpeed * 2.2 * dt;
+
+        if (state.keys['w']) {
+          state.dronePos[0] += forward[0] * speed; state.dronePos[1] += forward[1] * speed; state.dronePos[2] += forward[2] * speed;
+        }
+        if (state.keys['s']) {
+          state.dronePos[0] -= forward[0] * speed; state.dronePos[1] -= forward[1] * speed; state.dronePos[2] -= forward[2] * speed;
+        }
+        if (state.keys['a']) {
+          state.dronePos[0] -= right[0] * speed; state.dronePos[2] -= right[2] * speed;
+        }
+        if (state.keys['d']) {
+          state.dronePos[0] += right[0] * speed; state.dronePos[2] += right[2] * speed;
+        }
+        if (state.keys['q']) state.dronePos[1] -= speed;
+        if (state.keys['e']) state.dronePos[1] += speed;
+
+        if (joyActive) {
+          state.dronePos[0] += (forward[0] * joyVec.y + right[0] * joyVec.x) * speed;
+          state.dronePos[1] += (forward[1] * joyVec.y + right[1] * joyVec.x) * speed;
+          state.dronePos[2] += (forward[2] * joyVec.y + right[2] * joyVec.x) * speed;
+        }
+
+        if (altVel !== 0) state.dronePos[1] += altVel * speed;
+
+        // Check Proximity Haptics
+        checkProximityHaptics();
+      }
+
+      function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const w = Math.floor(window.innerWidth * dpr);
+        const h = Math.floor(window.innerHeight * dpr);
+
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+          createPingPongFBO(w, h);
+          resetTemporalAccumulation();
+        }
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      // Render Routine
+      function renderScene(now, targetFBO, frameIndex) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, targetFBO);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
+        gl.useProgram(program);
+        gl.bindVertexArray(vao);
+
+        let jitterX = 0, jitterY = 0;
+        if (state.useTemporalAA && frameIndex > 0) {
+          jitterX = (halton(frameIndex, 2) - 0.5) * 1.5;
+          jitterY = (halton(frameIndex, 3) - 0.5) * 1.5;
+        }
+
+        let ro = [0, 0, 3], ta = [0, 0, 0];
+        if (state.camMode === 0 && !state.tourActive) {
+          ro[0] = state.camTarget[0] + state.camDist * Math.cos(state.camPitch) * Math.sin(state.camYaw);
+          ro[1] = state.camTarget[1] + state.camDist * Math.sin(state.camPitch);
+          ro[2] = state.camTarget[2] + state.camDist * Math.cos(state.camPitch) * Math.cos(state.camYaw);
+          ta = [...state.camTarget];
+        } else {
+          ro = [...state.dronePos];
+          ta = [...state.camTarget];
+          if (!state.tourActive) {
+            const effPitch = state.dronePitch + state.gyroPitch;
+            const effYaw = state.droneYaw + state.gyroYaw;
+            ta[0] = ro[0] + Math.cos(effPitch) * Math.sin(effYaw);
+            ta[1] = ro[1] + Math.sin(effPitch);
+            ta[2] = ro[2] + Math.cos(effPitch) * Math.cos(effYaw);
+          }
+        }
+
+        gl.uniform2f(uLoc.resolution, canvas.width, canvas.height);
+        gl.uniform3f(uLoc.camPos, ro[0], ro[1], ro[2]);
+        gl.uniform3f(uLoc.camTarget, ta[0], ta[1], ta[2]);
+        gl.uniform1f(uLoc.fov, state.fov);
+        gl.uniform1f(uLoc.time, now * 0.001);
+        gl.uniform2f(uLoc.subpixelJitter, jitterX, jitterY);
+        gl.uniform1i(uLoc.frame, frameIndex);
+        gl.uniform1i(uLoc.useTemporalAA, state.useTemporalAA ? 1 : 0);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, (currentPingPong === 0) ? texPong : texPing);
+        gl.uniform1i(uLoc.prevFrame, 0);
+
+        gl.uniform1i(uLoc.equation, state.equation);
+        gl.uniform1f(uLoc.power, state.power);
+        gl.uniform1i(uLoc.maxIter, state.maxIter);
+        gl.uniform1f(uLoc.scale, state.scale);
+        gl.uniform1f(uLoc.sliceW, state.sliceW);
+        gl.uniform1i(uLoc.useBoundingSphere, state.useBoundingSphere ? 1 : 0);
+
+        gl.uniform1i(uLoc.palette, state.palette);
+        gl.uniform1f(uLoc.circuitMix, state.circuitMix);
+        gl.uniform1f(uLoc.veinMix, state.veinMix);
+        gl.uniform1f(uLoc.specular, state.specular);
+        gl.uniform1f(uLoc.fresnel, state.fresnel);
+        gl.uniform1f(uLoc.aoIntensity, state.aoIntensity);
+        gl.uniform1f(uLoc.edgeGlow, state.edgeGlow);
+        gl.uniform1f(uLoc.stepMultiplier, state.stepMultiplier);
+        gl.uniform1i(uLoc.maxSteps, state.maxSteps);
+
+        // Advanced Lighting & Optics
+        gl.uniform1f(uLoc.shadowSoftness, state.shadowSoftness);
+        gl.uniform1f(uLoc.godRayIntensity, state.godRayIntensity);
+        gl.uniform1f(uLoc.fogDensity, state.fogDensity);
+        gl.uniform1f(uLoc.chromaAberration, state.chromaAberration);
+
+        // Audio Reactivity FFT
+        gl.uniform1f(uLoc.audioBass, audio.bass * state.audioBassWeight);
+        gl.uniform1f(uLoc.audioMid, audio.mid * state.audioVeinWeight);
+        gl.uniform1f(uLoc.audioHigh, audio.high * state.audioVeinWeight);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      }
+
+      // Timing & FPS
+      let lastTime = performance.now();
+      let frameCounter = 0, fpsTimer = 0;
+
+      function renderLoop(now) {
+        const dt = Math.min((now - lastTime) * 0.001, 0.1);
+        lastTime = now;
+
+        frameCounter++;
+        fpsTimer += dt;
+        if (fpsTimer >= 0.5) {
+          el.fpsDisplay.textContent = Math.round(frameCounter / fpsTimer);
+          frameCounter = 0;
+          fpsTimer = 0;
+        }
+
+        updateFlightDynamics(dt, now);
+        drawAudioVisualizer();
+
+        // Auto-Orbit in Orbit Mode
+        if (state.animating && state.camMode === 0 && !state.tourActive && !isDragging) {
+          state.camYaw += 0.12 * dt;
+          resetTemporalAccumulation();
+        }
+
+        // Auto W-Slice Morphing driven by Bass
+        if (state.autoMorph && !state.tourActive) {
+          state.sliceW = Math.sin(now * 0.0006) * 1.25;
+          el.paramSliceW.value = state.sliceW;
+          el.valSliceW.textContent = state.sliceW.toFixed(2);
+          resetTemporalAccumulation();
+        }
+
+        if (isInteracting && now - lastInteractionTime > 120) {
+          isInteracting = false;
+        }
+
+        // Temporal AA
+        if (state.useTemporalAA) {
+          const destFBO = (currentPingPong === 0) ? fboPing : fboPong;
+          renderScene(now, destFBO, temporalFrame);
+
+          gl.bindFramebuffer(gl.READ_FRAMEBUFFER, destFBO);
+          gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+          gl.blitFramebuffer(
+            0, 0, canvas.width, canvas.height,
+            0, 0, canvas.width, canvas.height,
+            gl.COLOR_BUFFER_BIT, gl.NEAREST
+          );
+
+          currentPingPong = 1 - currentPingPong;
+
+          if (isInteracting || state.tourActive) {
+            temporalFrame = 0;
+            el.statusDot.classList.add('active-dynamic');
+            el.resModeDisplay.textContent = 'DYNAMIC';
+            el.msaaSamples.textContent = '1';
+          } else {
+            if (temporalFrame < 48) temporalFrame++;
+            el.statusDot.classList.remove('active-dynamic');
+            el.resModeDisplay.textContent = (temporalFrame >= 48) ? 'CONVERGED' : 'CONVERGING';
+            el.msaaSamples.textContent = `${temporalFrame + 1}`;
+          }
+        } else {
+          renderScene(now, null, 0);
+          el.statusDot.classList.remove('active-dynamic');
+          el.resModeDisplay.textContent = 'DIRECT';
+          el.msaaSamples.textContent = '1';
+        }
+
+        requestAnimationFrame(renderLoop);
+      }
+
+      // Initialize
+      resizeCanvas();
+      syncUI();
+      requestAnimationFrame(renderLoop);
+
+    })();
+  </script>
+</body>
+</html>

@@ -181,20 +181,15 @@
       gap: 6px;
     }
 
-    .dock-group {
+    .dock-select-wrap {
       display: flex;
       align-items: center;
-      gap: 3px;
-      background: rgba(0, 0, 0, 0.35);
-      padding: 3px;
+      gap: 6px;
+      flex: 1;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      width: 100%;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .dock-group::-webkit-scrollbar {
-      display: none;
+      padding: 3px 8px;
     }
 
     .dock-label {
@@ -203,44 +198,40 @@
       font-weight: 700;
       letter-spacing: 0.8px;
       color: var(--text-muted);
-      padding-left: 6px;
+      padding-left: 2px;
       padding-right: 2px;
       flex-shrink: 0;
     }
 
-    .segment-btn {
+    .hud-dropdown {
+      flex: 1;
       background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
+      border: none;
+      color: var(--text);
       font-family: inherit;
       font-size: 11px;
       font-weight: 600;
-      padding: 5px 9px;
-      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-      white-space: nowrap;
-      flex: 1;
-      min-width: 52px;
+      outline: none;
+      padding: 5px 22px 5px 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      background-size: 12px;
     }
-    .segment-btn:hover {
-      color: var(--text);
-    }
-    .segment-btn.active {
-      background: var(--btn-active);
-      border-color: rgba(0, 240, 255, 0.35);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0, 240, 255, 0.2);
+    .hud-dropdown option {
+      background-color: #0c121e;
+      color: #f1f5f9;
+      font-size: 12px;
+      padding: 6px;
     }
 
-    /* Palette chips row with Tuning Toggle */
+    /* Palette chips row */
     .palette-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr) auto;
+      grid-template-columns: repeat(4, 1fr);
       gap: 5px;
       width: 100%;
       align-items: center;
@@ -458,7 +449,7 @@
 
     @media (max-width: 480px) {
       .palette-row {
-        grid-template-columns: repeat(4, 1fr) auto;
+        grid-template-columns: repeat(4, 1fr);
       }
       .tuning-grid {
         grid-template-columns: 1fr;
@@ -470,12 +461,8 @@
         padding: 6px 8px;
         border-radius: 16px;
       }
-      .segment-btn {
-        padding: 5px 6px;
-        font-size: 10px;
-      }
       .palette-chip {
-        padding: 5px 4px;
+        padding: 5px 3px;
         font-size: 10px;
       }
       .palette-chip span:last-child {
@@ -487,6 +474,10 @@
       .tuning-toggle-btn {
         padding: 5px 8px;
         font-size: 10px;
+      }
+      .hud-dropdown {
+        font-size: 10px;
+        padding: 4px 18px 4px 2px;
       }
     }
   </style>
@@ -516,19 +507,35 @@
   <!-- Floating Mobile-Optimized HUD Island -->
   <footer id="bottom-dock">
     <div class="dock-island">
-      <!-- 5 Distinct Fractal Equations -->
+      <!-- Top Row: Equation Selector Dropdown & Tuning Toggle -->
       <div class="dock-row">
-        <div class="dock-group" style="flex: 1;">
-          <span class="dock-label">FORM</span>
-          <button class="segment-btn active" data-eq="0" title="Power-N Mandelbulb">Bulb</button>
-          <button class="segment-btn" data-eq="1" title="Architectural Mandelbox">Box</button>
-          <button class="segment-btn" data-eq="2" title="Brutalist Menger Sponge">Menger</button>
-          <button class="segment-btn" data-eq="3" title="Quaternion Julia 4D">Julia 4D</button>
-          <button class="segment-btn" data-eq="4" title="Sierpinski Polyhedral Gem">KIFS</button>
+        <div class="dock-select-wrap">
+          <label for="eq-select" class="dock-label">FRACTAL</label>
+          <select id="eq-select" class="hud-dropdown">
+            <option value="0">1. Power-N Mandelbulb</option>
+            <option value="1">2. Architectural Mandelbox</option>
+            <option value="2">3. 4D Quaternion Julia</option>
+            <option value="3">4. Apollonian Gasket (Spheres)</option>
+            <option value="4">5. Menger / Sierpinski Lattice</option>
+          </select>
         </div>
+        <button id="btn-toggle-tuning" class="tuning-toggle-btn active" title="Toggle 5 Math & Visual Sliders">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          <span>Sliders</span>
+        </button>
       </div>
 
-      <!-- Color Palettes & Tuning Drawer Toggle -->
+      <!-- Middle Row: Color Palettes -->
       <div class="palette-row">
         <button class="palette-chip active" data-palette="0" title="Liquid Obsidian & Gold">
           <span class="color-swatch swatch-gold"></span>
@@ -546,65 +553,51 @@
           <span class="color-swatch swatch-magma"></span>
           <span>Magma</span>
         </button>
-        <button id="btn-toggle-tuning" class="tuning-toggle-btn active" title="Toggle 5 Math & Visual Sliders">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="4" y1="21" x2="4" y2="14"></line>
-            <line x1="4" y1="10" x2="4" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12" y2="3"></line>
-            <line x1="20" y1="21" x2="20" y2="16"></line>
-            <line x1="20" y1="12" x2="20" y2="3"></line>
-            <line x1="1" y1="14" x2="7" y2="14"></line>
-            <line x1="9" y1="8" x2="15" y2="8"></line>
-            <line x1="17" y1="16" x2="23" y2="16"></line>
-          </svg>
-          <span>Tune</span>
-        </button>
       </div>
 
-      <!-- 5 Interactive Math & Visual Sliders Panel -->
+      <!-- 5 Live HUD Sliders Panel -->
       <div id="tuning-panel" class="tuning-panel">
         <div class="tuning-grid">
-          <!-- 1. Morph / Equation Math Parameter -->
+          <!-- Slider 1: Morph / 4D W-Slice -->
           <div class="slider-card full-width">
             <div class="slider-header">
-              <span class="slider-name">1. MORPH (FORM PARAMETER)</span>
-              <span id="val-morph" class="slider-num">Power 8.0</span>
+              <span class="slider-name">1. MORPH / 4D W-SLICE</span>
+              <span id="val-morph" class="slider-num">0.00</span>
             </div>
-            <input type="range" id="slider-morph" min="3.0" max="12.0" step="0.1" value="8.0">
+            <input type="range" id="slider-morph" min="-2.0" max="2.0" step="0.02" value="0.0">
           </div>
 
-          <!-- 2. Detail / Max Iterations -->
-          <div class="slider-card">
+          <!-- Slider 2: Scale / Power -->
+          <div class="slider-card full-width">
             <div class="slider-header">
-              <span class="slider-name">2. DETAIL / ITER</span>
-              <span id="val-detail" class="slider-num">6 iter</span>
+              <span class="slider-name">2. SCALE / POWER</span>
+              <span id="val-scale" class="slider-num">Power 8.0</span>
             </div>
-            <input type="range" id="slider-detail" min="4" max="10" step="1" value="6">
+            <input type="range" id="slider-scale" min="3.0" max="12.0" step="0.1" value="8.0">
           </div>
 
-          <!-- 3. Glow / Specular Sheen -->
+          <!-- Slider 3: Iteration Depth -->
           <div class="slider-card">
             <div class="slider-header">
-              <span class="slider-name">3. GLOW / SHEEN</span>
-              <span id="val-glow" class="slider-num">1.5x</span>
+              <span class="slider-name">3. ITERATION DEPTH</span>
+              <span id="val-iter" class="slider-num">6 iter</span>
             </div>
-            <input type="range" id="slider-glow" min="0.2" max="3.0" step="0.1" value="1.5">
+            <input type="range" id="slider-iter" min="3" max="14" step="1" value="6">
           </div>
 
-          <!-- 4. Color Shift / Orbit Phase -->
+          <!-- Slider 4: Surface Polish / Metallic -->
           <div class="slider-card">
             <div class="slider-header">
-              <span class="slider-name">4. COLOR CYCLE</span>
-              <span id="val-color" class="slider-num">+0.00</span>
+              <span class="slider-name">4. SURFACE POLISH</span>
+              <span id="val-polish" class="slider-num">1.5x</span>
             </div>
-            <input type="range" id="slider-color" min="0.0" max="6.28" step="0.05" value="0.0">
+            <input type="range" id="slider-polish" min="0.1" max="3.0" step="0.1" value="1.5">
           </div>
 
-          <!-- 5. Shadow / Crevice Contrast -->
-          <div class="slider-card">
+          <!-- Slider 5: Crevice Shadow / AO -->
+          <div class="slider-card full-width">
             <div class="slider-header">
-              <span class="slider-name">5. SHADOW / AO</span>
+              <span class="slider-name">5. CREVICE SHADOW / AO</span>
               <span id="val-shadow" class="slider-num">1.8x</span>
             </div>
             <input type="range" id="slider-shadow" min="0.5" max="3.5" step="0.1" value="1.8">
@@ -613,7 +606,7 @@
 
         <div class="tuning-actions">
           <button id="btn-reset-sliders" class="tuning-sub-btn">Reset Defaults</button>
-          <button id="btn-random-sliders" class="tuning-sub-btn">Randomize Form</button>
+          <button id="btn-random-sliders" class="tuning-sub-btn">Randomize Math</button>
         </div>
       </div>
     </div>
@@ -645,48 +638,55 @@
     uniform vec3  u_camTarget;
     uniform float u_fov;
     uniform float u_time;
-    uniform int   u_equation;       // 0: Mandelbulb, 1: Mandelbox, 2: Menger, 3: Julia, 4: KIFS
+    uniform int   u_equation;       // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
     uniform int   u_palette;        // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Crimson Magma
     uniform int   u_maxSteps;       // Dynamic raymarching step budget
-    uniform int   u_maxIter;        // Dynamic fractal iteration budget (4 to 10)
+    uniform int   u_maxIter;        // Dynamic fractal iteration budget (3 to 14)
     uniform int   u_aoTaps;         // Dynamic AO tap count (1 to 3)
-    uniform float u_stepMultiplier; // Dynamic step fudge factor (0.70 to 0.95)
+    uniform float u_stepMultiplier; // Dynamic step fudge factor (0.75 to 0.90)
     uniform float u_epsilonScale;   // Dynamic hit threshold multiplier
-    uniform float u_param;          // Slider 1: Morph / Mathematical parameter
-    uniform float u_glow;           // Slider 3: Specular hardness & rim sheen
-    uniform float u_colorShift;     // Slider 4: Orbit trap phase shift
-    uniform float u_aoStrength;     // Slider 5: AO shadow contrast
+    uniform float u_morph;          // Slider 1: Morph / 4D W-Slice (-2.0 to 2.0)
+    uniform float u_scalePower;     // Slider 2: Scale / Power
+    uniform float u_metallicPolish; // Slider 4: Surface Polish / Metallic (0.1 to 3.0)
+    uniform float u_aoContrast;     // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
 
-    // Analytical Bounding Sphere Check: zero extra cost on miss
+    // Analytical Bounding Sphere Check with deep-zoom inside-sphere traversal
     bool intersectSphere(vec3 ro, vec3 rd, float rad, out float tEnter, out float tExit) {
       float b = dot(ro, rd);
       float c = dot(ro, ro) - rad * rad;
+      if (c <= 0.0) {
+        // Camera is inside the bounding sphere during deep zoom
+        tEnter = 0.001;
+        tExit = -b + sqrt(max(b * b - c, 0.0));
+        return true;
+      }
       float h = b * b - c;
       if (h < 0.0) return false;
       h = sqrt(h);
       tEnter = -b - h;
       tExit = -b + h;
       if (tExit < 0.0) return false;
-      tEnter = max(tEnter, 0.005);
+      tEnter = max(tEnter, 0.001);
       return true;
     }
 
     float getBoundingRadius(int eq) {
       if (eq == 0) return 2.5; // Mandelbulb
-      if (eq == 1) return 3.5; // Mandelbox
-      if (eq == 2) return 2.2; // Menger Sponge
-      if (eq == 3) return 2.3; // Quaternion Julia
-      return 2.8;              // Sierpinski KIFS
+      if (eq == 1) return 3.6; // Mandelbox
+      if (eq == 2) return 2.4; // Quaternion Julia
+      if (eq == 3) return 2.9; // Apollonian Gasket
+      return 2.4;              // Menger / Sierpinski Lattice
     }
 
-    // 1. Power-N Mandelbulb: Bulbous organic lobes with variable power morph
-    float deMandelbulb(vec3 p, float power, out float trap) {
+    // 1. Power-N Mandelbulb: Iconic bulbous lobes and sharp micro-filaments
+    float deMandelbulb(vec3 p, float power, float morph, out float trap) {
       vec3 w = p;
+      w.z += morph * 0.12;
       float dz = 1.0;
       float r = 0.0;
       trap = 1e10;
 
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
         r = length(w);
         trap = min(trap, abs(w.z) * 0.85 + length(w.xy) * 0.35);
@@ -705,20 +705,21 @@
       return 0.5 * log(max(r, 1.0001)) * r / max(dz, 1e-6);
     }
 
-    // 2. Architectural Mandelbox: Tglad's folding crystal metropolis
-    float deMandelbox(vec3 p, float boxScale, out float trap) {
+    // 2. Architectural Mandelbox: Recursive pillars and geometric halls
+    float deMandelbox(vec3 p, float boxScale, float morph, out float trap) {
       vec3 offset = p;
       vec3 z = p;
       float dz = 1.0;
       trap = 1e10;
       float scale = boxScale;
+      float foldLimit = clamp(1.0 + morph * 0.2, 0.6, 1.4);
       const float minR2 = 0.25;
       const float fixR2 = 1.0;
 
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
         // Tglad box fold
-        z = clamp(z, -1.0, 1.0) * 2.0 - z;
+        z = clamp(z, -foldLimit, foldLimit) * 2.0 - z;
 
         // Sphere fold
         float r2 = dot(z, z);
@@ -740,39 +741,15 @@
       return (length(z) - 0.05) / max(abs(dz), 1e-5);
     }
 
-    // 3. Brutalist Menger Sponge: Infinite cruciform portals and architectural galleries
-    float deMenger(vec3 p, float morph, out float trap) {
-      vec3 z = p;
-      vec3 b = abs(z) - vec3(1.0);
-      float d = min(max(b.x, max(b.y, b.z)), 0.0) + length(max(b, 0.0));
-      float s = 1.0;
-      trap = 1e10;
-      float sc = morph;
-
-      for (int i = 0; i < 10; i++) {
-        if (i >= u_maxIter) break;
-        vec3 a = mod(z * s, 2.0) - 1.0;
-        s *= sc;
-        vec3 r = abs(1.0 - sc * abs(a));
-        float da = max(r.x, r.y);
-        float db = max(r.y, r.z);
-        float dc = max(r.z, r.x);
-        float c = (min(da, min(db, dc)) - 1.0) / s;
-        d = max(d, c);
-        trap = min(trap, length(r.xy) * 0.5 + abs(r.z) * 0.5);
-      }
-      return d;
-    }
-
-    // 4. Quaternion Julia: 4D hyper-slice producing twisting fluid ribbons and chrome loops
-    float deQuaternionJulia(vec3 p, float morph, out float trap) {
+    // 3. 4D Quaternion Julia: Smooth, alien hyper-dimensional spirals
+    float deQuaternionJulia(vec3 p, float scalePower, float morph, out float trap) {
       vec4 z = vec4(p, morph * 0.45);
-      vec4 c = vec4(-0.35, 0.55, 0.22, -0.15 + morph * 0.12);
+      vec4 c = vec4(-0.38, 0.52, 0.25, -0.18 + morph * 0.12) * (scalePower * 0.8);
       float dz2 = 1.0;
       float r2 = 0.0;
       trap = 1e10;
 
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
         r2 = dot(z, z);
         if (r2 > 4.5) break;
@@ -788,47 +765,69 @@
       return 0.35 * sqrt(r2 / max(dz2, 1e-6)) * log(max(r2, 1.0001));
     }
 
-    // 5. Sierpinski Polyhedral Gem (KIFS): Sacred geometry faceted crystal pyramid
-    float deKIFS(vec3 p, float morph, out float trap) {
+    // 4. Apollonian Gasket: Pure hollow spheres and nested orbits
+    float deApollonian(vec3 p, float scalePower, float morph, out float trap) {
       vec3 z = p;
-      float scale = morph;
-      float totalScale = 1.0;
+      float scale = 1.0;
       trap = 1e10;
+      float kParam = scalePower;
 
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
-        if (z.x + z.y < 0.0) z.xy = -z.yx;
-        if (z.x + z.z < 0.0) z.xz = -z.zx;
-        if (z.y + z.z < 0.0) z.yz = -z.zy;
-
-        z = z * scale - vec3(1.0, 1.0, 1.0) * (scale - 1.0);
-        totalScale *= scale;
-
-        trap = min(trap, length(z.xz) * 0.6 + abs(z.y) * 0.4);
+        z = -1.0 + 2.0 * fract(0.5 * z + 0.5);
+        float r2 = dot(z, z);
+        trap = min(trap, r2);
+        float k = max(kParam / max(r2, 0.001), 0.15);
+        z *= k;
+        scale *= k;
       }
-      return (length(z) - 0.45) / totalScale;
+      float dSphere = 0.25 * (length(z) - (0.85 + morph * 0.18)) / scale;
+      return max(dSphere, length(p) - 2.8);
+    }
+
+    // 5. Menger / Sierpinski Lattice: Clean crystalline cubic windows with open negative space
+    float deMenger(vec3 p, float scalePower, float morph, out float trap) {
+      vec3 z = p;
+      vec3 b = abs(z) - vec3(1.0);
+      float d = min(max(b.x, max(b.y, b.z)), 0.0) + length(max(b, 0.0));
+      float s = 1.0;
+      trap = 1e10;
+      float sc = scalePower;
+
+      for (int i = 0; i < 14; i++) {
+        if (i >= u_maxIter) break;
+        vec3 a = mod(z * s, 2.0) - 1.0;
+        s *= sc;
+        vec3 r = abs(1.0 - sc * abs(a));
+        float da = max(r.x, r.y);
+        float db = max(r.y, r.z);
+        float dc = max(r.z, r.x);
+        float c = (min(da, min(db, dc)) - (1.0 + morph * 0.15)) / s;
+        d = max(d, c);
+        trap = min(trap, length(r.xy) * 0.5 + abs(r.z) * 0.5);
+      }
+      return d;
     }
 
     // Master distance evaluator
     float mapScene(vec3 p, out float trap) {
       if (u_equation == 0) {
-        return deMandelbulb(p, u_param, trap);
+        return deMandelbulb(p, u_scalePower, u_morph, trap);
       } else if (u_equation == 1) {
-        return deMandelbox(p, u_param, trap);
+        return deMandelbox(p, u_scalePower, u_morph, trap);
       } else if (u_equation == 2) {
-        return deMenger(p, u_param, trap);
+        return deQuaternionJulia(p, u_scalePower, u_morph, trap);
       } else if (u_equation == 3) {
-        return deQuaternionJulia(p, u_param, trap);
+        return deApollonian(p, u_scalePower, u_morph, trap);
       } else {
-        return deKIFS(p, u_param, trap);
+        return deMenger(p, u_scalePower, u_morph, trap);
       }
     }
 
     // Lightweight 4-tap tetrahedral normal calculation with Deep-Zoom Definition Retention:
-    // Epsilon scales with camera ray travel distance to resolve micro-ridges cleanly without faceting
+    // Normal epsilon scales with ray travel distance to resolve micro-geometry without faceting
     vec3 calcNormal(vec3 p, float t) {
-      float pixelFootprint = (2.0 * tan(radians(u_fov * 0.5)) / u_res.y) * t;
-      float eps = max(0.00008, pixelFootprint * 0.45);
+      float eps = max(t * 0.00015, 0.00001);
       vec2 e = vec2(1.0, -1.0) * 0.5773 * eps;
       float tr;
       return normalize(
@@ -855,14 +854,13 @@
       return clamp(1.0 - 2.6 * occ, 0.25, 1.0);
     }
 
-    // High-contrast clean palettes with dynamic Orbit Phase Shift
+    // High-contrast clean palettes
     vec3 getPaletteSurface(int pal, float trap, out vec3 specColor, out vec3 rimColor) {
       vec3 col = vec3(0.0);
       specColor = vec3(1.0);
       rimColor = vec3(1.0);
 
-      float tRaw = trap + u_colorShift * 0.35;
-      float t = clamp(fract(tRaw * 0.8), 0.0, 1.0);
+      float t = clamp(fract(trap * 0.8), 0.0, 1.0);
 
       if (pal == 0) {
         // 1. Liquid Obsidian & Gold: Deep reflective onyx with pure 24K gold filaments
@@ -882,7 +880,7 @@
       } else if (pal == 2) {
         // 3. Pearlescent Porcelain: Sculptural museum marble with pearlescent sheen
         vec3 porcelain = mix(vec3(0.80, 0.83, 0.88), vec3(0.96, 0.97, 0.99), t);
-        vec3 shimmer = mix(vec3(0.92, 0.84, 1.0), vec3(0.82, 0.95, 1.0), sin((tRaw + 0.1) * 6.28) * 0.5 + 0.5);
+        vec3 shimmer = mix(vec3(0.92, 0.84, 1.0), vec3(0.82, 0.95, 1.0), sin((trap + 0.1) * 6.28) * 0.5 + 0.5);
         col = mix(porcelain, shimmer, 0.18);
         specColor = vec3(1.0, 1.0, 1.0);
         rimColor = vec3(0.88, 0.94, 1.0);
@@ -919,7 +917,7 @@
 
       // Analytical Bounding Sphere Envelope Check
       float boundingRadius = getBoundingRadius(u_equation);
-      float tEnter = 0.006;
+      float tEnter = 0.001;
       float tExit = 24.0;
       bool hitBound = intersectSphere(ro, rd, boundingRadius, tEnter, tExit);
 
@@ -947,10 +945,8 @@
         float d = mapScene(pos, trap);
 
         // Deep-Zoom Adaptive Epsilon:
-        // Adapts hit detection to camera ray travel distance and pixel footprint.
-        // Prevents premature step stopping during deep zoom, ensuring razor-sharp sub-pixel edge definition.
-        float pixelFootprint = (2.0 * tan(radians(u_fov * 0.5)) / u_res.y) * t;
-        float eps = max(0.00007 * u_epsilonScale, pixelFootprint * 0.52 * u_epsilonScale);
+        // Set hit epsilon to max(t * 0.00015, 0.000005) so zooming close preserves crisp geometry
+        float eps = max(t * 0.00015, 0.000005) * u_epsilonScale;
 
         if (d < eps) {
           hit = true;
@@ -971,16 +967,17 @@
         float keyDiff = max(dot(nor, keyDir), 0.0);
         float skyDiff = clamp(nor.y * 0.5 + 0.5, 0.0, 1.0) * 0.18;
 
-        // Contact Ambient Occlusion with Contrast slider modulation
+        // Contact Ambient Occlusion modulated by Crevice Shadow slider
         float rawAO = calcAO(pos, nor);
-        float ao = pow(rawAO, u_aoStrength);
+        float ao = pow(rawAO, u_aoContrast);
 
-        // Hard Blinn-Phong specular glints on metallic edges
+        // Blinn-Phong specular glints on metallic edges modulated by Surface Polish slider
         vec3 halfVec = normalize(keyDir - rd);
-        float spec = pow(max(dot(nor, halfVec), 0.0), 64.0);
-        float fresnel = pow(clamp(1.0 + dot(rd, nor), 0.0, 1.0), 3.5);
+        float shininess = 24.0 * u_metallicPolish + 8.0;
+        float spec = pow(max(dot(nor, halfVec), 0.0), shininess);
+        float fresnel = pow(clamp(1.0 + dot(rd, nor), 0.0, 1.0), 3.5 / max(u_metallicPolish, 0.2));
 
-        // Surface palette color with phase shift
+        // Surface palette color
         vec3 specColor;
         vec3 rimColor;
         vec3 surface = getPaletteSurface(u_palette, hitTrap, specColor, rimColor);
@@ -989,9 +986,9 @@
         vec3 lighting = (keyDiff * vec3(1.45, 1.38, 1.30) + skyDiff * vec3(0.35, 0.40, 0.50)) * ao;
         col = surface * lighting;
 
-        // Metallic edges specular glints and silhouette rim scaled by Glow slider
-        col += rimColor * fresnel * (0.45 * u_glow) * ao;
-        col += specColor * spec * (2.2 * u_glow) * ao;
+        // Metallic edges specular glints and silhouette rim scaled by Surface Polish slider
+        col += rimColor * fresnel * (0.55 * u_metallicPolish) * ao;
+        col += specColor * spec * (2.4 * u_metallicPolish) * ao;
 
         // Subtle atmospheric depth fade
         float fog = 1.0 - exp(-t * 0.06);
@@ -1019,9 +1016,9 @@
 
       // State
       const state = {
-        equation: 0,       // 0: Mandelbulb, 1: Mandelbox, 2: Menger, 3: Julia, 4: KIFS
-        palette: 0,        // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Magma
-        renderScale: 0.5,  // Bootstrap 0.5x
+        equation: 0,            // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
+        palette: 0,             // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Magma
+        renderScale: 0.65,       // Bootstrap 0.65x
         fov: 54.0,
         // Camera spherical coords
         yaw: 0.8,
@@ -1031,45 +1028,50 @@
         targetPitch: 0.35,
         targetDist: 2.65,
         camTarget: [0, 0, 0],
-        // 5 Math & Visual Parameters
-        param: 8.0,        // Slider 1: Morph
-        detail: 6,         // Slider 2: Detail / Iterations (4 to 10)
-        glow: 1.5,         // Slider 3: Key Specular & Rim Sheen (0.2 to 3.0)
-        colorShift: 0.0,   // Slider 4: Orbit Trap Color Cycle (0.0 to 6.28)
-        shadow: 1.8        // Slider 5: AO Shadow Contrast (0.5 to 3.5)
+        // 5 Live Math & Visual Sliders
+        morph: 0.0,             // Slider 1: Morph / 4D W-Slice (-2.0 to 2.0)
+        scalePower: 8.0,        // Slider 2: Scale / Power (equation-dependent)
+        maxIter: 6,             // Slider 3: Iteration Depth (3 to 14)
+        metallicPolish: 1.5,    // Slider 4: Surface Polish / Metallic (0.1 to 3.0)
+        aoContrast: 1.8         // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
       };
 
-      // 5 Equation Presets with Deep-Zoom limits & customized Morph math configs
+      // 5 Equation Presets with Deep-Zoom limits & Scale/Power configs
       const eqConfigs = [
         {
-          name: 'Mandelbulb',
-          defaultDist: 2.65, minDist: 0.10, maxDist: 5.5, defaultYaw: 0.8, defaultPitch: 0.35,
+          name: 'Power-N Mandelbulb',
+          defaultDist: 2.65, minDist: 0.002, maxDist: 6.0, defaultYaw: 0.8, defaultPitch: 0.35,
           camTarget: [0, 0, 0],
-          morph: { name: 'Power', val: 8.0, min: 3.0, max: 12.0, step: 0.1, decimals: 1 }
+          scalePower: { name: 'Power', val: 8.0, min: 3.0, max: 12.0, step: 0.1, decimals: 1 },
+          morphDefault: 0.0
         },
         {
-          name: 'Mandelbox',
-          defaultDist: 4.2,  minDist: 0.15, maxDist: 8.5, defaultYaw: 0.75, defaultPitch: 0.45,
+          name: 'Architectural Mandelbox',
+          defaultDist: 4.2,  minDist: 0.002, maxDist: 8.5, defaultYaw: 0.75, defaultPitch: 0.45,
           camTarget: [0, 0, 0],
-          morph: { name: 'Scale', val: -2.2, min: -2.8, max: -1.3, step: 0.05, decimals: 2 }
+          scalePower: { name: 'Scale', val: -2.2, min: -3.0, max: -1.1, step: 0.05, decimals: 2 },
+          morphDefault: 0.0
         },
         {
-          name: 'Menger',
-          defaultDist: 2.7,  minDist: 0.12, maxDist: 6.0, defaultYaw: 0.65, defaultPitch: 0.40,
+          name: '4D Quaternion Julia',
+          defaultDist: 2.3,  minDist: 0.002, maxDist: 5.5, defaultYaw: 0.9, defaultPitch: 0.30,
           camTarget: [0, 0, 0],
-          morph: { name: 'Aperture', val: 3.0, min: 2.2, max: 3.8, step: 0.05, decimals: 2 }
+          scalePower: { name: 'Scale', val: 1.2, min: 0.5, max: 2.5, step: 0.05, decimals: 2 },
+          morphDefault: 0.0
         },
         {
-          name: 'Julia 4D',
-          defaultDist: 2.2,  minDist: 0.08, maxDist: 5.0, defaultYaw: 0.9, defaultPitch: 0.30,
+          name: 'Apollonian Gasket',
+          defaultDist: 3.2,  minDist: 0.002, maxDist: 7.0, defaultYaw: 0.65, defaultPitch: 0.40,
           camTarget: [0, 0, 0],
-          morph: { name: '4D Slice', val: 0.0, min: -1.0, max: 1.0, step: 0.02, decimals: 2 }
+          scalePower: { name: 'Scale', val: 1.8, min: 1.2, max: 2.6, step: 0.05, decimals: 2 },
+          morphDefault: 0.0
         },
         {
-          name: 'KIFS Gem',
-          defaultDist: 2.8,  minDist: 0.10, maxDist: 6.0, defaultYaw: 0.7, defaultPitch: 0.38,
+          name: 'Menger / Sierpinski Lattice',
+          defaultDist: 2.7,  minDist: 0.002, maxDist: 6.0, defaultYaw: 0.7, defaultPitch: 0.38,
           camTarget: [0, 0, 0],
-          morph: { name: 'Fold', val: 2.0, min: 1.6, max: 2.5, step: 0.02, decimals: 2 }
+          scalePower: { name: 'Scale', val: 3.0, min: 2.0, max: 3.8, step: 0.05, decimals: 2 },
+          morphDefault: 0.0
         }
       ];
 
@@ -1134,29 +1136,29 @@
       gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
       // Uniform Locations
-      const uResLocation        = gl.getUniformLocation(prog, 'u_res');
-      const uCamPosLocation     = gl.getUniformLocation(prog, 'u_camPos');
-      const uCamTargetLocation  = gl.getUniformLocation(prog, 'u_camTarget');
-      const uFovLocation        = gl.getUniformLocation(prog, 'u_fov');
-      const uTimeLocation       = gl.getUniformLocation(prog, 'u_time');
-      const uEquationLocation   = gl.getUniformLocation(prog, 'u_equation');
-      const uPaletteLocation    = gl.getUniformLocation(prog, 'u_palette');
-      const uMaxStepsLocation   = gl.getUniformLocation(prog, 'u_maxSteps');
-      const uMaxIterLocation    = gl.getUniformLocation(prog, 'u_maxIter');
-      const uAoTapsLocation     = gl.getUniformLocation(prog, 'u_aoTaps');
-      const uStepMultLocation   = gl.getUniformLocation(prog, 'u_stepMultiplier');
-      const uEpsScaleLocation   = gl.getUniformLocation(prog, 'u_epsilonScale');
-      const uParamLocation      = gl.getUniformLocation(prog, 'u_param');
-      const uGlowLocation       = gl.getUniformLocation(prog, 'u_glow');
-      const uColorShiftLocation = gl.getUniformLocation(prog, 'u_colorShift');
-      const uAoStrengthLocation = gl.getUniformLocation(prog, 'u_aoStrength');
+      const uResLocation            = gl.getUniformLocation(prog, 'u_res');
+      const uCamPosLocation         = gl.getUniformLocation(prog, 'u_camPos');
+      const uCamTargetLocation      = gl.getUniformLocation(prog, 'u_camTarget');
+      const uFovLocation            = gl.getUniformLocation(prog, 'u_fov');
+      const uTimeLocation           = gl.getUniformLocation(prog, 'u_time');
+      const uEquationLocation       = gl.getUniformLocation(prog, 'u_equation');
+      const uPaletteLocation        = gl.getUniformLocation(prog, 'u_palette');
+      const uMaxStepsLocation       = gl.getUniformLocation(prog, 'u_maxSteps');
+      const uMaxIterLocation        = gl.getUniformLocation(prog, 'u_maxIter');
+      const uAoTapsLocation         = gl.getUniformLocation(prog, 'u_aoTaps');
+      const uStepMultLocation       = gl.getUniformLocation(prog, 'u_stepMultiplier');
+      const uEpsScaleLocation       = gl.getUniformLocation(prog, 'u_epsilonScale');
+      const uMorphLocation          = gl.getUniformLocation(prog, 'u_morph');
+      const uScalePowerLocation     = gl.getUniformLocation(prog, 'u_scalePower');
+      const uMetallicPolishLocation = gl.getUniformLocation(prog, 'u_metallicPolish');
+      const uAoContrastLocation     = gl.getUniformLocation(prog, 'u_aoContrast');
 
       // Automated Adaptive Performance Governor
       class AdaptivePerformanceGovernor {
         constructor() {
-          // Lightweight Bootstrap Mode
-          this.renderScale = 0.5;      // Initial render scale: 0.5x
-          this.targetScale = 0.5;
+          // Lightweight Bootstrap Mode (0.65x)
+          this.renderScale = 0.65;     // Initial render scale: 0.65x
+          this.targetScale = 0.65;
           this.maxSteps = 28;          // Initial max ray steps: 28
           this.iterPenalty = 0;        // Iteration reduction when overloaded
           this.aoTaps = 2;             // Crisp lightweight contact AO
@@ -1184,7 +1186,7 @@
           // Measure rolling frame delta
           this.rollingDt = 0.15 * dt + 0.85 * this.rollingDt;
 
-          const baseFudge = (equation === 0 || equation === 2) ? 0.85 : 0.78;
+          const baseFudge = (equation === 0 || equation === 4) ? 0.85 : 0.78;
           this.stepMultiplier = baseFudge;
 
           // 1. FRAME TIME EXCEEDS 16.7ms (FPS < 58) -> DOWNGRADE
@@ -1275,6 +1277,7 @@
         state.targetYaw = cfg.defaultYaw;
         state.targetPitch = cfg.defaultPitch;
         state.targetDist = cfg.defaultDist;
+        state.camTarget = cfg.camTarget.slice();
       }
 
       // Minimalist Top Bar Telemetry & Auto-Hiding
@@ -1320,7 +1323,7 @@
         }
       }
 
-      // Touch & Pointer Gesture Engine with Smooth Inertia
+      // Touch & Pointer Gesture Engine with Smooth Inertia and Deep-Zoom Orbit Damping
       let isPointerDown = false;
       let lastPointerX = 0;
       let lastPointerY = 0;
@@ -1358,7 +1361,9 @@
           lastPointerX = e.clientX;
           lastPointerY = e.clientY;
 
-          const rotSpeed = 0.0055;
+          // Orbit rotation sensitivity scales down at close range to prevent whipping at micro zoom
+          const rotDamping = Math.max(0.18, Math.min(1.0, state.dist * 0.75));
+          const rotSpeed = 0.0055 * rotDamping;
           state.targetYaw -= dx * rotSpeed;
           state.targetPitch = Math.max(-1.46, Math.min(1.46, state.targetPitch - dy * rotSpeed));
         } else if (activeTouches.size === 2 && touchPinchStartDist !== null) {
@@ -1409,84 +1414,104 @@
 
       // DOM Elements for 5 Sliders & Tuning Drawer
       const sliderMorph     = document.getElementById('slider-morph');
-      const sliderDetail    = document.getElementById('slider-detail');
-      const sliderGlow      = document.getElementById('slider-glow');
-      const sliderColor     = document.getElementById('slider-color');
+      const sliderScale     = document.getElementById('slider-scale');
+      const sliderIter      = document.getElementById('slider-iter');
+      const sliderPolish    = document.getElementById('slider-polish');
       const sliderShadow    = document.getElementById('slider-shadow');
 
       const valMorphEl      = document.getElementById('val-morph');
-      const valDetailEl     = document.getElementById('val-detail');
-      const valGlowEl       = document.getElementById('val-glow');
-      const valColorEl      = document.getElementById('val-color');
+      const valScaleEl      = document.getElementById('val-scale');
+      const valIterEl       = document.getElementById('val-iter');
+      const valPolishEl     = document.getElementById('val-polish');
       const valShadowEl     = document.getElementById('val-shadow');
 
+      const eqSelect        = document.getElementById('eq-select');
       const tuningPanelEl   = document.getElementById('tuning-panel');
       const btnToggleTuning = document.getElementById('btn-toggle-tuning');
       const btnResetSliders = document.getElementById('btn-reset-sliders');
       const btnRandomSliders = document.getElementById('btn-random-sliders');
 
-      function updateMorphSliderUI() {
-        const mCfg = eqConfigs[state.equation].morph;
-        if (!sliderMorph) return;
-        sliderMorph.min = mCfg.min;
-        sliderMorph.max = mCfg.max;
-        sliderMorph.step = mCfg.step;
-        sliderMorph.value = state.param;
-        if (valMorphEl) {
-          valMorphEl.textContent = `${mCfg.name} ${Number(state.param).toFixed(mCfg.decimals)}`;
+      function updateScaleSliderUI() {
+        const spCfg = eqConfigs[state.equation].scalePower;
+        if (!sliderScale) return;
+        sliderScale.min = spCfg.min;
+        sliderScale.max = spCfg.max;
+        sliderScale.step = spCfg.step;
+        sliderScale.value = state.scalePower;
+        if (valScaleEl) {
+          valScaleEl.textContent = `${spCfg.name} ${Number(state.scalePower).toFixed(spCfg.decimals)}`;
         }
       }
 
-      // Slider 1: Morph Form
+      function updateMorphSliderUI() {
+        if (!sliderMorph) return;
+        sliderMorph.value = state.morph;
+        if (valMorphEl) {
+          valMorphEl.textContent = (state.morph >= 0 ? '+' : '') + Number(state.morph).toFixed(2);
+        }
+      }
+
+      function switchEquation(eq) {
+        state.equation = eq;
+        if (eqSelect) eqSelect.value = eq;
+        state.scalePower = eqConfigs[eq].scalePower.val;
+        state.morph = eqConfigs[eq].morphDefault;
+        updateScaleSliderUI();
+        updateMorphSliderUI();
+        resetCamera();
+        resetIdleTimer();
+      }
+
+      // Slider 1: Morph / 4D W-Slice (-2.0 to 2.0)
       if (sliderMorph) {
         sliderMorph.addEventListener('input', (e) => {
-          state.param = parseFloat(e.target.value);
-          eqConfigs[state.equation].morph.val = state.param;
-          const mCfg = eqConfigs[state.equation].morph;
-          if (valMorphEl) valMorphEl.textContent = `${mCfg.name} ${state.param.toFixed(mCfg.decimals)}`;
+          state.morph = parseFloat(e.target.value);
+          if (valMorphEl) valMorphEl.textContent = (state.morph >= 0 ? '+' : '') + state.morph.toFixed(2);
           resetIdleTimer();
         });
       }
 
-      // Slider 2: Detail / Iterations
-      if (sliderDetail) {
-        sliderDetail.addEventListener('input', (e) => {
-          state.detail = parseInt(e.target.value, 10);
-          if (valDetailEl) valDetailEl.textContent = `${state.detail} iter`;
+      // Slider 2: Scale / Power (Equation-dependent)
+      if (sliderScale) {
+        sliderScale.addEventListener('input', (e) => {
+          state.scalePower = parseFloat(e.target.value);
+          eqConfigs[state.equation].scalePower.val = state.scalePower;
+          const spCfg = eqConfigs[state.equation].scalePower;
+          if (valScaleEl) valScaleEl.textContent = `${spCfg.name} ${state.scalePower.toFixed(spCfg.decimals)}`;
           resetIdleTimer();
         });
       }
 
-      // Slider 3: Glow / Sheen
-      if (sliderGlow) {
-        sliderGlow.addEventListener('input', (e) => {
-          state.glow = parseFloat(e.target.value);
-          if (valGlowEl) valGlowEl.textContent = `${state.glow.toFixed(1)}x`;
+      // Slider 3: Iteration Depth (3 to 14)
+      if (sliderIter) {
+        sliderIter.addEventListener('input', (e) => {
+          state.maxIter = parseInt(e.target.value, 10);
+          if (valIterEl) valIterEl.textContent = `${state.maxIter} iter`;
           resetIdleTimer();
         });
       }
 
-      // Slider 4: Color Cycle / Orbit Phase
-      if (sliderColor) {
-        sliderColor.addEventListener('input', (e) => {
-          state.colorShift = parseFloat(e.target.value);
-          if (valColorEl) valColorEl.textContent = `${state.colorShift >= 0 ? '+' : ''}${state.colorShift.toFixed(2)}`;
+      // Slider 4: Surface Polish / Metallic (0.1 to 3.0)
+      if (sliderPolish) {
+        sliderPolish.addEventListener('input', (e) => {
+          state.metallicPolish = parseFloat(e.target.value);
+          if (valPolishEl) valPolishEl.textContent = `${state.metallicPolish.toFixed(1)}x`;
           resetIdleTimer();
         });
       }
 
-      // Slider 5: Shadow / AO Contrast
+      // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
       if (sliderShadow) {
         sliderShadow.addEventListener('input', (e) => {
-          state.shadow = parseFloat(e.target.value);
-          if (valShadowEl) valShadowEl.textContent = `${state.shadow.toFixed(1)}x`;
+          state.aoContrast = parseFloat(e.target.value);
+          if (valShadowEl) valShadowEl.textContent = `${state.aoContrast.toFixed(1)}x`;
           resetIdleTimer();
         });
       }
 
       // Prevent slider touches from causing camera orbit/pinch
       const stopSliderProp = (e) => e.stopPropagation();
-      [sliderMorph, sliderDetail, sliderGlow, sliderColor, sliderShadow, tuningPanelEl].forEach(el => {
+      [sliderMorph, sliderScale, sliderIter, sliderPolish, sliderShadow, tuningPanelEl, eqSelect].forEach(el => {
         if (!el) return;
         el.addEventListener('pointerdown', stopSliderProp, { passive: true });
         el.addEventListener('pointermove', stopSliderProp, { passive: true });
@@ -1506,25 +1531,24 @@
       // Reset Sliders to Defaults
       if (btnResetSliders) {
         btnResetSliders.addEventListener('click', () => {
-          const mCfg = eqConfigs[state.equation].morph;
-          state.param = (state.equation === 0) ? 8.0 : (state.equation === 1 ? -2.2 : (state.equation === 2 ? 3.0 : (state.equation === 3 ? 0.0 : 2.0)));
-          mCfg.val = state.param;
-          state.detail = 6;
-          state.glow = 1.5;
-          state.colorShift = 0.0;
-          state.shadow = 1.8;
+          const cfg = eqConfigs[state.equation];
+          state.morph = cfg.morphDefault;
+          state.scalePower = (state.equation === 0) ? 8.0 : (state.equation === 1 ? -2.2 : (state.equation === 2 ? 1.2 : (state.equation === 3 ? 1.8 : 3.0)));
+          cfg.scalePower.val = state.scalePower;
+          state.maxIter = 6;
+          state.metallicPolish = 1.5;
+          state.aoContrast = 1.8;
 
-          if (sliderDetail) sliderDetail.value = 6;
-          if (sliderGlow) sliderGlow.value = 1.5;
-          if (sliderColor) sliderColor.value = 0.0;
+          if (sliderIter) sliderIter.value = 6;
+          if (sliderPolish) sliderPolish.value = 1.5;
           if (sliderShadow) sliderShadow.value = 1.8;
 
-          if (valDetailEl) valDetailEl.textContent = '6 iter';
-          if (valGlowEl) valGlowEl.textContent = '1.5x';
-          if (valColorEl) valColorEl.textContent = '+0.00';
+          if (valIterEl) valIterEl.textContent = '6 iter';
+          if (valPolishEl) valPolishEl.textContent = '1.5x';
           if (valShadowEl) valShadowEl.textContent = '1.8x';
 
           updateMorphSliderUI();
+          updateScaleSliderUI();
           resetIdleTimer();
         });
       }
@@ -1532,35 +1556,37 @@
       // Randomize Form / Math Parameter
       if (btnRandomSliders) {
         btnRandomSliders.addEventListener('click', () => {
-          const mCfg = eqConfigs[state.equation].morph;
-          const randVal = mCfg.min + Math.random() * (mCfg.max - mCfg.min);
-          state.param = parseFloat(randVal.toFixed(mCfg.decimals));
-          mCfg.val = state.param;
-          state.colorShift = parseFloat((Math.random() * 6.28).toFixed(2));
-          if (sliderColor) sliderColor.value = state.colorShift;
-          if (valColorEl) valColorEl.textContent = `+${state.colorShift.toFixed(2)}`;
+          const spCfg = eqConfigs[state.equation].scalePower;
+          const randScale = spCfg.min + Math.random() * (spCfg.max - spCfg.min);
+          state.scalePower = parseFloat(randScale.toFixed(spCfg.decimals));
+          spCfg.val = state.scalePower;
+
+          const randMorph = -1.5 + Math.random() * 3.0;
+          state.morph = parseFloat(randMorph.toFixed(2));
+
+          state.metallicPolish = parseFloat((0.5 + Math.random() * 2.2).toFixed(1));
+          state.aoContrast = parseFloat((1.0 + Math.random() * 2.0).toFixed(1));
+
+          if (sliderPolish) sliderPolish.value = state.metallicPolish;
+          if (sliderShadow) sliderShadow.value = state.aoContrast;
+          if (valPolishEl) valPolishEl.textContent = `${state.metallicPolish.toFixed(1)}x`;
+          if (valShadowEl) valShadowEl.textContent = `${state.aoContrast.toFixed(1)}x`;
+
           updateMorphSliderUI();
+          updateScaleSliderUI();
           resetIdleTimer();
         });
       }
 
-      // UI Bindings
-      // 1. Equation Switcher (5 Equations)
-      const eqBtns = document.querySelectorAll('[data-eq]');
-      eqBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const eq = parseInt(btn.dataset.eq, 10);
-          if (state.equation === eq) return;
-          state.equation = eq;
-          state.param = eqConfigs[eq].morph.val;
-          eqBtns.forEach(b => b.classList.toggle('active', b === btn));
-          updateMorphSliderUI();
-          resetCamera();
-          resetIdleTimer();
+      // Dropdown Equation Switcher (5 Equations)
+      if (eqSelect) {
+        eqSelect.addEventListener('change', (e) => {
+          const eq = parseInt(e.target.value, 10);
+          switchEquation(eq);
         });
-      });
+      }
 
-      // 2. Palette Chips
+      // Palette Chips
       const palBtns = document.querySelectorAll('[data-palette]');
       palBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1571,7 +1597,7 @@
         });
       });
 
-      // 3. Reset Button
+      // Reset Button
       const resetBtn = document.getElementById('btn-reset');
       if (resetBtn) {
         resetBtn.addEventListener('click', () => {
@@ -1586,7 +1612,8 @@
         if (hint) hint.style.opacity = '0';
       }, 4500);
 
-      // Initialize Morph Slider UI
+      // Initialize Sliders UI
+      updateScaleSliderUI();
       updateMorphSliderUI();
 
       // Render Loop
@@ -1614,6 +1641,7 @@
 
         const time = (now - startTime) * 0.001;
         const camPos = getCameraPosition();
+        const activeIter = Math.max(3, state.maxIter - governor.iterPenalty);
 
         gl.uniform2f(uResLocation, canvas.width, canvas.height);
         gl.uniform3fv(uCamPosLocation, camPos);
@@ -1623,14 +1651,14 @@
         gl.uniform1i(uEquationLocation, state.equation);
         gl.uniform1i(uPaletteLocation, state.palette);
         gl.uniform1i(uMaxStepsLocation, governor.maxSteps);
-        gl.uniform1i(uMaxIterLocation, Math.max(4, state.detail - governor.iterPenalty));
+        gl.uniform1i(uMaxIterLocation, activeIter);
         gl.uniform1i(uAoTapsLocation, governor.aoTaps);
         gl.uniform1f(uStepMultLocation, governor.stepMultiplier);
         gl.uniform1f(uEpsScaleLocation, governor.epsilonScale);
-        gl.uniform1f(uParamLocation, state.param);
-        gl.uniform1f(uGlowLocation, state.glow);
-        gl.uniform1f(uColorShiftLocation, state.colorShift);
-        gl.uniform1f(uAoStrengthLocation, state.shadow);
+        gl.uniform1f(uMorphLocation, state.morph);
+        gl.uniform1f(uScalePowerLocation, state.scalePower);
+        gl.uniform1f(uMetallicPolishLocation, state.metallicPolish);
+        gl.uniform1f(uAoContrastLocation, state.aoContrast);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       }

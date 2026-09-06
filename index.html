@@ -54,100 +54,68 @@
       cursor: grabbing;
     }
 
-    /* Top HUD Bar */
+    /* Minimalist Auto-Hiding Top HUD Bar */
     #top-bar {
       position: fixed;
-      top: env(safe-area-inset-top, 12px);
-      left: 14px;
-      right: 14px;
+      top: max(12px, env(safe-area-inset-top, 12px));
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      z-index: 20;
+      gap: 8px;
+      z-index: 30;
       pointer-events: none;
-      gap: 8px;
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .top-left, .top-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      pointer-events: auto;
+    #top-bar.hidden {
+      opacity: 0;
+      transform: translate(-50%, -16px);
+      pointer-events: none;
     }
 
-    .brand-pill {
+    .telemetry-pill {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 6px 12px;
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      padding: 6px 14px;
       border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
-    .brand-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      animation: pulse 2.5s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.7; transform: scale(0.9); }
-      50% { opacity: 1; transform: scale(1.15); }
-    }
-
-    .brand-title {
-      font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: #fff;
-    }
-
-    .fps-badge {
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
       font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
       font-size: 11px;
       font-weight: 600;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: var(--emerald);
-      padding: 5px 10px;
-      border-radius: 16px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-      white-space: nowrap;
-      transition: color 0.2s, border-color 0.2s;
+      color: #f1f5f9;
+      pointer-events: auto;
     }
 
-    .perf-pill {
-      font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-      font-size: 10.5px;
-      font-weight: 600;
-      background: rgba(0, 240, 255, 0.1);
-      border: 1px solid rgba(0, 240, 255, 0.28);
-      color: var(--accent);
-      padding: 5px 9px;
-      border-radius: 14px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+    .telemetry-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      animation: pulse 2.5s infinite ease-in-out;
     }
-    .perf-pill.locked {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.14);
-      color: var(--text-muted);
+
+    .telemetry-divider {
+      color: rgba(255, 255, 255, 0.22);
+      font-weight: 400;
+    }
+
+    .telemetry-fps {
+      color: var(--emerald);
+      font-weight: 700;
+      transition: color 0.2s ease;
+    }
+
+    .telemetry-res {
+      color: var(--accent);
+      font-weight: 600;
+      transition: color 0.2s ease;
     }
 
     .icon-btn {
@@ -167,6 +135,7 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
       transition: all 0.15s ease;
       touch-action: manipulation;
+      pointer-events: auto;
     }
     .icon-btn:hover {
       border-color: var(--accent);
@@ -356,44 +325,32 @@
   <!-- WebGL 2.0 Fullscreen Canvas -->
   <canvas id="viewport"></canvas>
 
-  <!-- Minimal Top Header -->
+  <!-- Minimalist Auto-Hiding Top Bar: Active Dynamic Resolution & Live FPS -->
   <header id="top-bar">
-    <div class="top-left">
-      <div class="brand-pill">
-        <span class="brand-dot"></span>
-        <span class="brand-title">AETHER</span>
-      </div>
-      <div id="fps-counter" class="fps-badge">60 FPS • 16.6ms</div>
-      <div id="perf-pill" class="perf-pill">AUTO 0.75x</div>
+    <div class="telemetry-pill">
+      <span class="telemetry-dot"></span>
+      <span id="fps-val" class="telemetry-fps">60 FPS • 16.6ms</span>
+      <span class="telemetry-divider">|</span>
+      <span id="res-val" class="telemetry-res">0.50x</span>
     </div>
-    <div class="top-right">
-      <button id="btn-reset" class="icon-btn" title="Reset Camera">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-          <path d="M3 3v5h5"/>
-        </svg>
-        Reset
-      </button>
-    </div>
+    <button id="btn-reset" class="icon-btn" title="Reset Camera">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+      Reset
+    </button>
   </header>
 
   <!-- Floating Mobile-Optimized HUD Island -->
   <footer id="bottom-dock">
     <div class="dock-island">
-      <!-- Equation & Resolution Scale Row -->
+      <!-- Equation Selection -->
       <div class="dock-row">
-        <div class="dock-group" style="flex: 1.1;">
+        <div class="dock-group" style="flex: 1;">
           <span class="dock-label">FORM</span>
           <button class="segment-btn active" data-eq="0">Mandelbulb</button>
           <button class="segment-btn" data-eq="1">Mandelbox</button>
-        </div>
-
-        <div class="dock-group" style="flex: 1.3;">
-          <span class="dock-label">RES</span>
-          <button class="segment-btn active" data-scale="auto">AUTO</button>
-          <button class="segment-btn" data-scale="0.5">0.5x</button>
-          <button class="segment-btn" data-scale="0.75">0.75x</button>
-          <button class="segment-btn" data-scale="1.0">1.0x</button>
         </div>
       </div>
 
@@ -467,7 +424,7 @@
       return true;
     }
 
-    // 1. Clean Power-8 Mandelbulb: Iconic bulbous lobes & sharp micro-filaments
+    // 1. Clean Power-8 Mandelbulb: Iconic bulbous lobes with broad polished surfaces (iterations: 4 - 6)
     float deMandelbulb(vec3 p, out float trap) {
       vec3 w = p;
       float dz = 1.0;
@@ -475,7 +432,7 @@
       trap = 1e10;
       const float power = 8.0;
 
-      for (int i = 0; i < 14; i++) {
+      for (int i = 0; i < 6; i++) {
         if (i >= u_maxIter) break;
         r = length(w);
         trap = min(trap, abs(w.z) * 0.85 + length(w.xy) * 0.35);
@@ -494,7 +451,7 @@
       return 0.5 * log(max(r, 1.0001)) * r / max(dz, 1e-6);
     }
 
-    // 2. Architectural Mandelbox: Box fold, sphere fold, clean architectural lines
+    // 2. Architectural Mandelbox: Monolithic architectural crystal forms with broad polished planes (iterations: 4 - 6)
     float deMandelbox(vec3 p, out float trap) {
       vec3 offset = p;
       vec3 z = p;
@@ -504,7 +461,7 @@
       const float minR2 = 0.25;
       const float fixR2 = 1.0;
 
-      for (int i = 0; i < 12; i++) {
+      for (int i = 0; i < 6; i++) {
         if (i >= u_maxIter) break;
         // Tglad box fold
         z = clamp(z, -1.0, 1.0) * 2.0 - z;
@@ -538,9 +495,10 @@
       }
     }
 
-    // Finite-difference tetrahedral normal
+    // Lightweight 4-tap tetrahedral normal calculation:
+    // normal = normalize(e.xyy*map(p + e.xyy) + e.yyx*map(p + e.yyx) + e.yxy*map(p + e.yxy) + e.xxx*map(p + e.xxx))
     vec3 calcNormal(vec3 p, float t) {
-      float eps = max(0.0004, t * 0.0005);
+      float eps = max(0.0005, t * 0.0006);
       vec2 e = vec2(1.0, -1.0) * 0.5773 * eps;
       float tr;
       return normalize(
@@ -630,8 +588,8 @@
       float fovFactor = tan(radians(u_fov * 0.5));
       vec3 rd = normalize(p.x * uu * fovFactor + p.y * vv * fovFactor + ww);
 
-      // Analytical Bounding Sphere: Exit immediately if missed
-      float boundingRadius = (u_equation == 0) ? 1.65 : 3.4;
+      // Analytical Bounding Sphere Envelope: Exit immediately if missed (radius 2.5)
+      float boundingRadius = 2.5;
       float tEnter = 0.02;
       float tExit = 24.0;
       bool hitBound = intersectSphere(ro, rd, boundingRadius, tEnter, tExit);
@@ -649,9 +607,13 @@
       float hitTrap = 0.0;
       float trap = 0.0;
 
-      for (int i = 0; i < 64; i++) {
+      for (int i = 0; i < 48; i++) {
         if (i >= u_maxSteps || t > tMax) break;
         vec3 pos = ro + rd * t;
+
+        // Early ray escape threshold: terminate immediately if ray travels beyond radius 2.5
+        if (dot(pos, pos) > 6.25) break;
+
         float d = mapScene(pos, trap);
         float eps = max(0.001 * u_epsilonScale, 0.0008 * t * u_epsilonScale);
         if (d < eps) {
@@ -668,34 +630,31 @@
         vec3 pos = ro + rd * t;
         vec3 nor = calcNormal(pos, t);
 
-        // Directional Key Light & Secondary Fill
-        vec3 keyDir = normalize(vec3(1.2, 1.7, 1.0));
-        vec3 fillDir = normalize(vec3(-1.2, 0.5, -0.8));
-
+        // Single directional key light with hard specular glints on metallic edges
+        vec3 keyDir = normalize(vec3(1.25, 1.75, 1.05));
         float keyDiff = max(dot(nor, keyDir), 0.0);
-        float fillDiff = max(dot(nor, fillDir), 0.0) * 0.32;
-        float skyDiff = clamp(nor.y * 0.5 + 0.5, 0.0, 1.0) * 0.16;
+        float skyDiff = clamp(nor.y * 0.5 + 0.5, 0.0, 1.0) * 0.18;
 
-        // 3-tap Crisp Contact AO
+        // Contact AO
         float ao = calcAO(pos, nor);
 
-        // Hard Blinn-Phong Specular Glints on Metallic Edges
+        // Hard Blinn-Phong specular glints on metallic edges
         vec3 halfVec = normalize(keyDir - rd);
         float spec = pow(max(dot(nor, halfVec), 0.0), 64.0);
         float fresnel = pow(clamp(1.0 + dot(rd, nor), 0.0, 1.0), 3.5);
 
-        // Palette Surface Color
+        // Surface palette color
         vec3 specColor;
         vec3 rimColor;
         vec3 surface = getPaletteSurface(u_palette, hitTrap, specColor, rimColor);
 
-        // Direct Shading Composition with Crisp Contact AO
-        vec3 lighting = (keyDiff * vec3(1.4, 1.35, 1.3) + fillDiff * vec3(0.5, 0.65, 0.85) + skyDiff * vec3(0.3, 0.35, 0.45)) * ao;
+        // Direct lighting composition
+        vec3 lighting = (keyDiff * vec3(1.45, 1.38, 1.30) + skyDiff * vec3(0.35, 0.40, 0.50)) * ao;
         col = surface * lighting;
 
-        // Hard metallic specular glints + silhouette rim glow
-        col += rimColor * fresnel * 0.55 * ao;
-        col += specColor * spec * 2.4 * ao;
+        // Metallic edges specular glints and silhouette rim
+        col += rimColor * fresnel * 0.50 * ao;
+        col += specColor * spec * 2.5 * ao;
 
         // Subtle atmospheric depth fade
         float fog = 1.0 - exp(-t * 0.06);
@@ -817,141 +776,102 @@
       const uStepMultLocation  = gl.getUniformLocation(prog, 'u_stepMultiplier');
       const uEpsScaleLocation  = gl.getUniformLocation(prog, 'u_epsilonScale');
 
-      // Automatic Self-Regulating Performance Controller
-      class PerformanceController {
+      // Automated Adaptive Performance Governor
+      class AdaptivePerformanceGovernor {
         constructor() {
-          this.mode = 'auto'; // 'auto' or 'manual'
-          this.manualScale = 0.75;
-          this.currentScale = 0.75;
-          this.targetScale = 0.75;
-
-          this.maxSteps = 48;
-          this.maxIter = 10;
-          this.aoTaps = 3;
+          // Lightweight Bootstrap Mode
+          this.renderScale = 0.5;      // Initial render scale: 0.5x
+          this.targetScale = 0.5;
+          this.maxSteps = 28;           // Initial max ray steps: 28
+          this.maxIter = 5;             // Initial iterations: 5 (strictly capped to 4 - 6)
+          this.aoTaps = 2;              // Crisp lightweight contact AO
           this.stepMultiplier = 0.85;
           this.epsilonScale = 1.0;
 
-          this.targetFrameTime = 16.2; // Target 60 FPS budget (~16.2 ms)
-          this.emaDt = 16.2;
-          this.alpha = 0.14; // Low-pass filter weight
-          this.headroomStreak = 0;
-          this.throttleStreak = 0;
+          // Monitoring State
+          this.rollingDt = 16.6;
           this.lastFrameTime = performance.now();
+          this.under14msDuration = 0;   // Accumulated time under 14ms (ms)
+          this.lastStepReduceTime = 0;
         }
 
-        setMode(mode, value) {
-          this.mode = mode;
-          if (mode === 'manual') {
-            this.manualScale = value;
-            this.targetScale = value;
-            this.currentScale = value;
-            this.maxSteps = 48;
-            this.maxIter = (state.equation === 0) ? 10 : 9;
-            this.aoTaps = 3;
-            this.stepMultiplier = (state.equation === 0) ? 0.85 : 0.75;
-            this.epsilonScale = 1.0;
-          } else {
-            this.headroomStreak = 0;
-            this.throttleStreak = 0;
-          }
-        }
-
-        update(now, isInteracting, equation, dInertia) {
+        update(now, isInteracting, equation) {
           const dt = now - this.lastFrameTime;
           this.lastFrameTime = now;
 
-          // Guard against app backgrounding or tab pausing
+          // Filter outliers (app pause, tab switch)
           if (dt > 120 || dt <= 0) {
-            this.emaDt = 16.2;
+            this.rollingDt = 16.6;
+            this.under14msDuration = 0;
             return;
           }
 
-          // Smooth frame delta via Exponential Moving Average
-          this.emaDt = this.alpha * dt + (1.0 - this.alpha) * this.emaDt;
+          // Measure rolling frame delta
+          this.rollingDt = 0.15 * dt + 0.85 * this.rollingDt;
 
-          const baseFudge = (equation === 0) ? 0.85 : 0.75;
-          const baseIter = (equation === 0) ? 10 : 9;
-          const isMoving = isInteracting || (dInertia > 0.0035);
+          const baseFudge = (equation === 0) ? 0.85 : 0.78;
+          this.stepMultiplier = baseFudge;
 
-          if (this.mode === 'auto') {
-            // 1. OVERLOAD CONDITION: Frame time > 16.8 ms (FPS < 59.5)
-            if (this.emaDt > 16.8) {
-              this.headroomStreak = 0;
-              this.throttleStreak++;
-              const excess = this.emaDt - this.targetFrameTime;
+          // 1. FRAME TIME EXCEEDS 16.7ms (FPS < 58) -> DOWNGRADE
+          if (this.rollingDt > 16.7) {
+            this.under14msDuration = 0; // Reset recovery timer
 
-              // Fast-Fall: immediate downward scaling to eliminate frame drops
-              const drop = Math.min(0.08, Math.max(0.018, excess * 0.007));
-              this.targetScale = Math.max(0.42, this.targetScale - drop);
+            // Automatically decrement internal canvas resolution scale (down to 0.35x)
+            this.targetScale = Math.max(0.35, this.targetScale - 0.02);
+            this.renderScale = this.targetScale;
 
-              // Tier 2 Knobs: Step budget, iteration count, and AO shedding
-              if (this.targetScale < 0.52 || excess > 3.5) {
-                this.maxSteps = 36;
-                this.maxIter = Math.max(6, baseIter - 2);
-                this.aoTaps = 2;
-                this.stepMultiplier = baseFudge + 0.05;
-                this.epsilonScale = 1.35;
-              } else if (this.targetScale < 0.65) {
-                this.maxSteps = 42;
-                this.maxIter = Math.max(7, baseIter - 1);
+            // Reduce ray steps by 2 until solid 60 FPS is restored (min 16 steps)
+            if (now - this.lastStepReduceTime > 250) {
+              if (this.maxSteps > 16) {
+                this.maxSteps -= 2;
+              }
+              if (this.maxIter > 4) {
+                this.maxIter = 4;
+              }
+              this.lastStepReduceTime = now;
+            }
+          }
+          // 2. FRAME TIME RELIABLY UNDER 14ms -> SCALE UP ONLY AFTER 3 SECONDS
+          else if (this.rollingDt < 14.0 && !isInteracting) {
+            this.under14msDuration += dt;
+
+            // Only scale up quality if frame time has remained reliably under 14ms for at least 3 seconds
+            if (this.under14msDuration >= 3000) {
+              if (this.targetScale < 0.75) {
+                this.targetScale = Math.min(0.75, this.targetScale + 0.05);
+                this.renderScale = this.targetScale;
+              } else if (this.maxSteps < 36) {
+                this.maxSteps += 2;
+              } else if (this.maxIter < 6) {
+                this.maxIter = 6;
+              } else if (this.aoTaps < 3) {
                 this.aoTaps = 3;
-                this.stepMultiplier = baseFudge + 0.02;
-                this.epsilonScale = 1.18;
-              }
-            }
-            // 2. HEADROOM CONDITION: Frame time < 15.0 ms (FPS > 66.6)
-            else if (this.emaDt < 15.0) {
-              this.throttleStreak = 0;
-              this.headroomStreak++;
-
-              // Conservative Rise: require 18 consecutive frames of stable headroom
-              if (this.headroomStreak >= 18) {
-                this.targetScale = Math.min(1.0, this.targetScale + 0.025);
-                this.headroomStreak = 10; // Progressive recovery ladder
+              } else if (this.targetScale < 1.0) {
+                this.targetScale = Math.min(1.0, this.targetScale + 0.05);
+                this.renderScale = this.targetScale;
               }
 
-              if (this.targetScale >= 0.70) {
-                this.maxSteps = 48;
-                this.maxIter = baseIter;
-                this.aoTaps = 3;
-                this.stepMultiplier = baseFudge;
-                this.epsilonScale = 1.0;
-              }
+              // Partially reset so next tier requires another period of sustained headroom
+              this.under14msDuration = 1000;
             }
-            // 3. TARGET SWEET SPOT: 15.0ms - 16.8ms (Locked 60 FPS)
-            else {
-              this.headroomStreak = Math.max(0, this.headroomStreak - 1);
-              this.throttleStreak = 0;
-            }
-
-            // Interaction bias: slight dynamic scale offset during active camera movement
-            const interactionBias = isMoving ? -0.05 : 0.0;
-            const effectiveTarget = Math.max(0.42, Math.min(1.0, this.targetScale + interactionBias));
-
-            // Smooth scale convergence
-            this.currentScale += (effectiveTarget - this.currentScale) * 0.18;
-          } else {
-            // Manual mode
-            this.currentScale = this.manualScale;
-            this.maxSteps = 48;
-            this.maxIter = baseIter;
-            this.aoTaps = 3;
-            this.stepMultiplier = baseFudge;
-            this.epsilonScale = isMoving ? 1.2 : 1.0;
+          }
+          // 3. TARGET SWEET SPOT: 14.0ms - 16.7ms (SOLID LOCKED 60 FPS)
+          else {
+            this.under14msDuration = Math.max(0, this.under14msDuration - dt * 0.5);
           }
         }
 
         applyCanvasResolution(gl, canvas) {
           const w = window.innerWidth;
           const h = window.innerHeight;
-          const scale = this.currentScale;
+          const scale = this.renderScale;
 
           // Quantize to multiples of 4 to prevent continuous GPU buffer reallocations
-          const targetW = Math.max(160, Math.round((w * scale) / 4) * 4);
-          const targetH = Math.max(160, Math.round((h * scale) / 4) * 4);
+          const targetW = Math.max(120, Math.round((w * scale) / 4) * 4);
+          const targetH = Math.max(120, Math.round((h * scale) / 4) * 4);
 
-          // Deadband: only reallocate framebuffer when delta >= 6px
-          if (Math.abs(canvas.width - targetW) >= 6 || Math.abs(canvas.height - targetH) >= 6) {
+          // Deadband: only reallocate framebuffer when delta >= 4px
+          if (Math.abs(canvas.width - targetW) >= 4 || Math.abs(canvas.height - targetH) >= 4) {
             canvas.width = targetW;
             canvas.height = targetH;
             gl.viewport(0, 0, targetW, targetH);
@@ -959,9 +879,9 @@
         }
       }
 
-      const perf = new PerformanceController();
-      window.addEventListener('resize', () => perf.applyCanvasResolution(gl, canvas), { passive: true });
-      perf.applyCanvasResolution(gl, canvas);
+      const governor = new AdaptivePerformanceGovernor();
+      window.addEventListener('resize', () => governor.applyCanvasResolution(gl, canvas), { passive: true });
+      governor.applyCanvasResolution(gl, canvas);
 
       // Camera Calculation
       function getCameraPosition() {
@@ -983,40 +903,46 @@
         state.targetDist = cfg.defaultDist;
       }
 
-      // Live FPS Counter & Performance Controller Telemetry
-      const fpsEl = document.getElementById('fps-counter');
-      const perfPill = document.getElementById('perf-pill');
+      // Minimalist Top Bar Telemetry & Auto-Hiding
+      const fpsValEl = document.getElementById('fps-val');
+      const resValEl = document.getElementById('res-val');
+      const topBarEl = document.getElementById('top-bar');
       let telemetryTimer = performance.now();
+      let idleTimer = null;
+
+      function resetIdleTimer() {
+        if (topBarEl) topBarEl.classList.remove('hidden');
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+          if (topBarEl) topBarEl.classList.add('hidden');
+        }, 3000);
+      }
+
+      window.addEventListener('pointerdown', resetIdleTimer, { passive: true });
+      window.addEventListener('pointermove', resetIdleTimer, { passive: true });
+      window.addEventListener('touchstart', resetIdleTimer, { passive: true });
+      window.addEventListener('wheel', resetIdleTimer, { passive: true });
+      resetIdleTimer();
 
       function updateHUDTelemetry(now) {
-        if (now - telemetryTimer < 320) return;
+        if (now - telemetryTimer < 250) return;
         telemetryTimer = now;
 
-        const fps = Math.round(1000 / Math.max(perf.emaDt, 1));
-        const ms = perf.emaDt.toFixed(1);
-        fpsEl.textContent = `${fps} FPS • ${ms}ms`;
-
-        if (fps >= 55) {
-          fpsEl.style.color = '#10b981';
-          fpsEl.style.borderColor = 'rgba(16, 185, 129, 0.35)';
-          fpsEl.style.background = 'rgba(16, 185, 129, 0.12)';
-        } else if (fps >= 35) {
-          fpsEl.style.color = '#f59e0b';
-          fpsEl.style.borderColor = 'rgba(245, 158, 11, 0.35)';
-          fpsEl.style.background = 'rgba(245, 158, 11, 0.12)';
-        } else {
-          fpsEl.style.color = '#ef4444';
-          fpsEl.style.borderColor = 'rgba(239, 68, 68, 0.35)';
-          fpsEl.style.background = 'rgba(239, 68, 68, 0.12)';
+        const fps = Math.round(1000 / Math.max(governor.rollingDt, 1));
+        const ms = governor.rollingDt.toFixed(1);
+        if (fpsValEl) {
+          fpsValEl.textContent = `${fps} FPS • ${ms}ms`;
+          if (fps >= 55) {
+            fpsValEl.style.color = '#10b981';
+          } else if (fps >= 40) {
+            fpsValEl.style.color = '#f59e0b';
+          } else {
+            fpsValEl.style.color = '#ef4444';
+          }
         }
 
-        const pct = Math.round(perf.currentScale * 100);
-        if (perf.mode === 'auto') {
-          perfPill.textContent = `⚡ AUTO ${pct}% (${perf.maxSteps}st)`;
-          perfPill.classList.remove('locked');
-        } else {
-          perfPill.textContent = `🔒 LOCKED ${pct}%`;
-          perfPill.classList.add('locked');
+        if (resValEl) {
+          resValEl.textContent = `${(governor.renderScale).toFixed(2)}x (${governor.maxSteps} steps)`;
         }
       }
 
@@ -1119,22 +1045,7 @@
         });
       });
 
-      // 2. Resolution Scale & Automatic Controller Mode Selector
-      const scaleBtns = document.querySelectorAll('[data-scale]');
-      scaleBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const val = btn.dataset.scale;
-          if (val === 'auto') {
-            perf.setMode('auto');
-          } else {
-            perf.setMode('manual', parseFloat(val));
-          }
-          scaleBtns.forEach(b => b.classList.toggle('active', b === btn));
-          perf.applyCanvasResolution(gl, canvas);
-        });
-      });
-
-      // 3. Palette Chips
+      // 2. Palette Chips
       const palBtns = document.querySelectorAll('[data-palette]');
       palBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1144,8 +1055,14 @@
         });
       });
 
-      // 4. Reset Button
-      document.getElementById('btn-reset').addEventListener('click', resetCamera);
+      // 3. Reset Button
+      const resetBtn = document.getElementById('btn-reset');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          resetCamera();
+          resetIdleTimer();
+        });
+      }
 
       // Hide gesture hint after 4.5 seconds
       setTimeout(() => {
@@ -1164,15 +1081,16 @@
         const dPitch = Math.abs(state.targetPitch - state.pitch);
         const dDist = Math.abs(state.targetDist - state.dist);
         const dInertia = dYaw + dPitch + dDist;
+        const isInteracting = isPointerDown || dInertia > 0.005;
 
         // Smooth Camera Inertia Damping
         state.yaw += (state.targetYaw - state.yaw) * 0.16;
         state.pitch += (state.targetPitch - state.pitch) * 0.16;
         state.dist += (state.targetDist - state.dist) * 0.16;
 
-        // Self-Regulating Performance Controller & Telemetry Update
-        perf.update(now, isPointerDown, state.equation, dInertia);
-        perf.applyCanvasResolution(gl, canvas);
+        // Self-Regulating Performance Governor & Dynamic Resolution
+        governor.update(now, isInteracting, state.equation);
+        governor.applyCanvasResolution(gl, canvas);
         updateHUDTelemetry(now);
 
         const time = (now - startTime) * 0.001;
@@ -1185,11 +1103,11 @@
         gl.uniform1f(uTimeLocation, time);
         gl.uniform1i(uEquationLocation, state.equation);
         gl.uniform1i(uPaletteLocation, state.palette);
-        gl.uniform1i(uMaxStepsLocation, perf.maxSteps);
-        gl.uniform1i(uMaxIterLocation, perf.maxIter);
-        gl.uniform1i(uAoTapsLocation, perf.aoTaps);
-        gl.uniform1f(uStepMultLocation, perf.stepMultiplier);
-        gl.uniform1f(uEpsScaleLocation, perf.epsilonScale);
+        gl.uniform1i(uMaxStepsLocation, governor.maxSteps);
+        gl.uniform1i(uMaxIterLocation, governor.maxIter);
+        gl.uniform1i(uAoTapsLocation, governor.aoTaps);
+        gl.uniform1f(uStepMultLocation, governor.stepMultiplier);
+        gl.uniform1f(uEpsScaleLocation, governor.epsilonScale);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       }

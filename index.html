@@ -118,6 +118,12 @@
       transition: color 0.2s ease;
     }
 
+    .telemetry-aa {
+      color: #a78bfa;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
     .icon-btn {
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
@@ -448,6 +454,17 @@
     }
 
     @media (max-width: 480px) {
+      #top-bar {
+        gap: 5px;
+      }
+      .telemetry-pill {
+        padding: 5px 8px;
+        gap: 6px;
+        font-size: 10px;
+      }
+      #fidelity-label {
+        display: none;
+      }
       .palette-row {
         grid-template-columns: repeat(4, 1fr);
       }
@@ -487,21 +504,31 @@
   <!-- WebGL 2.0 Fullscreen Canvas -->
   <canvas id="viewport"></canvas>
 
-  <!-- Minimalist Auto-Hiding Top Bar: Active Dynamic Resolution & Live FPS -->
+  <!-- Minimalist Auto-Hiding Top Bar: Active Dynamic Resolution, TAA & Live FPS -->
   <header id="top-bar">
     <div class="telemetry-pill">
       <span class="telemetry-dot"></span>
       <span id="fps-val" class="telemetry-fps">60 FPS • 16.6ms</span>
       <span class="telemetry-divider">|</span>
-      <span id="res-val" class="telemetry-res">0.50x</span>
+      <span id="res-val" class="telemetry-res">Retina</span>
+      <span class="telemetry-divider">|</span>
+      <span id="aa-val" class="telemetry-aa">TAA 1x</span>
     </div>
-    <button id="btn-reset" class="icon-btn" title="Reset Camera">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-        <path d="M3 3v5h5"/>
-      </svg>
-      Reset
-    </button>
+    <div style="display: flex; gap: 6px; pointer-events: auto;">
+      <button id="btn-fidelity" class="icon-btn" title="Toggle Quality / Fidelity Preset">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <span id="fidelity-label">Auto HD</span>
+      </button>
+      <button id="btn-reset" class="icon-btn" title="Reset Camera">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset
+      </button>
+    </div>
   </header>
 
   <!-- Floating Mobile-Optimized HUD Island -->
@@ -625,7 +652,7 @@
     }
   </script>
 
-  <!-- WebGL 2.0 Fragment Shader: Locked 60 FPS Raymarching -->
+  <!-- WebGL 2.0 Fragment Shader: High-Fidelity Anti-Aliased Raymarching -->
   <script id="fs" type="x-shader/x-fragment">#version 300 es
     precision highp float;
     precision highp int;
@@ -633,22 +660,26 @@
     in vec2 v_uv;
     out vec4 fragColor;
 
-    uniform vec2  u_res;
-    uniform vec3  u_camPos;
-    uniform vec3  u_camTarget;
-    uniform float u_fov;
-    uniform float u_time;
-    uniform int   u_equation;       // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
-    uniform int   u_palette;        // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Crimson Magma
-    uniform int   u_maxSteps;       // Dynamic raymarching step budget
-    uniform int   u_maxIter;        // Dynamic fractal iteration budget (3 to 14)
-    uniform int   u_aoTaps;         // Dynamic AO tap count (1 to 3)
-    uniform float u_stepMultiplier; // Dynamic step fudge factor (0.75 to 0.90)
-    uniform float u_epsilonScale;   // Dynamic hit threshold multiplier
-    uniform float u_morph;          // Slider 1: Morph / 4D W-Slice (-2.0 to 2.0)
-    uniform float u_scalePower;     // Slider 2: Scale / Power
-    uniform float u_metallicPolish; // Slider 4: Surface Polish / Metallic (0.1 to 3.0)
-    uniform float u_aoContrast;     // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
+    uniform vec2      u_res;
+    uniform vec3      u_camPos;
+    uniform vec3      u_camTarget;
+    uniform float     u_fov;
+    uniform float     u_time;
+    uniform int       u_equation;       // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
+    uniform int       u_palette;        // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Crimson Magma
+    uniform int       u_maxSteps;       // Dynamic raymarching step budget
+    uniform int       u_maxIter;        // Dynamic fractal iteration budget (3 to 14)
+    uniform int       u_aoTaps;         // Dynamic AO tap count (1 to 3)
+    uniform float     u_stepMultiplier; // Dynamic step fudge factor (0.75 to 0.90)
+    uniform float     u_epsilonScale;   // Dynamic hit threshold multiplier
+    uniform float     u_morph;          // Slider 1: Morph / 4D W-Slice (-2.0 to 2.0)
+    uniform float     u_scalePower;     // Slider 2: Scale / Power
+    uniform float     u_metallicPolish; // Slider 4: Surface Polish / Metallic (0.1 to 3.0)
+    uniform float     u_aoContrast;     // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
+    uniform sampler2D u_prevTex;        // Previous frame texture for Progressive TAA Accumulation
+    uniform int       u_sampleIndex;    // Accumulation sample index (0 = fresh frame)
+    uniform vec2      u_jitter;         // Subpixel jitter offset in pixel coordinates
+    uniform int       u_softShadows;    // 1: soft penumbra shadows enabled, 0: disabled
 
     // Analytical Bounding Sphere Check with deep-zoom inside-sphere traversal
     bool intersectSphere(vec3 ro, vec3 rd, float rad, out float tEnter, out float tExit) {
@@ -854,6 +885,31 @@
       return clamp(1.0 - 2.6 * occ, 0.25, 1.0);
     }
 
+    // Soft penumbra shadow raymarching towards directional key light
+    float calcSoftShadow(vec3 ro, vec3 rd, float mint, float maxt, float k) {
+      float res = 1.0;
+      float t = mint;
+      float tr;
+      for (int i = 0; i < 16; i++) {
+        if (t >= maxt) break;
+        float d = mapScene(ro + rd * t, tr);
+        if (d < 0.0002) return 0.0;
+        res = min(res, k * d / t);
+        t += max(d * 0.85, 0.015);
+      }
+      return clamp(res, 0.0, 1.0);
+    }
+
+    // Multi-source ambient environment & studio reflection
+    vec3 getEnvironment(vec3 rd, vec3 keyDir) {
+      float grad = clamp(rd.y * 0.5 + 0.5, 0.0, 1.0);
+      vec3 sky = mix(vec3(0.010, 0.014, 0.022), vec3(0.038, 0.048, 0.068), grad);
+      float horizon = pow(1.0 - abs(rd.y), 8.0);
+      float sunDot = max(dot(rd, keyDir), 0.0);
+      vec3 sunGlow = pow(sunDot, 12.0) * vec3(0.5, 0.4, 0.25);
+      return sky + horizon * vec3(0.06, 0.09, 0.14) + sunGlow;
+    }
+
     // High-contrast clean palettes
     vec3 getPaletteSurface(int pal, float trap, out vec3 specColor, out vec3 rimColor) {
       vec3 col = vec3(0.0);
@@ -902,8 +958,8 @@
     }
 
     void main() {
-      // Normalized screen coordinates
-      vec2 p = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+      // Normalized screen coordinates with subpixel jitter for Progressive Anti-Aliasing (TAA)
+      vec2 p = (gl_FragCoord.xy + u_jitter - 0.5 * u_res) / u_res.y;
 
       // Look-At Camera Ray Setup
       vec3 ro = u_camPos;
@@ -921,78 +977,99 @@
       float tExit = 24.0;
       bool hitBound = intersectSphere(ro, rd, boundingRadius, tEnter, tExit);
 
+      vec3 col;
+
       if (!hitBound) {
-        fragColor = vec4(getBackground(rd), 1.0);
-        return;
-      }
+        col = getBackground(rd);
+      } else {
+        // Raymarching: dynamic step budget regulated by performance governor
+        float t = tEnter;
+        float tMax = min(tExit, 24.0);
+        float stepFudge = u_stepMultiplier;
+        bool hit = false;
+        float hitTrap = 0.0;
+        float trap = 0.0;
+        float boundR2 = boundingRadius * boundingRadius;
 
-      // Raymarching: dynamic step budget regulated by performance governor
-      float t = tEnter;
-      float tMax = min(tExit, 24.0);
-      float stepFudge = u_stepMultiplier;
-      bool hit = false;
-      float hitTrap = 0.0;
-      float trap = 0.0;
-      float boundR2 = boundingRadius * boundingRadius;
+        for (int i = 0; i < 54; i++) {
+          if (i >= u_maxSteps || t > tMax) break;
+          vec3 pos = ro + rd * t;
 
-      for (int i = 0; i < 54; i++) {
-        if (i >= u_maxSteps || t > tMax) break;
-        vec3 pos = ro + rd * t;
+          // Early ray escape threshold
+          if (dot(pos, pos) > boundR2) break;
 
-        // Early ray escape threshold
-        if (dot(pos, pos) > boundR2) break;
+          float d = mapScene(pos, trap);
 
-        float d = mapScene(pos, trap);
+          // Deep-Zoom Adaptive Epsilon:
+          // Set hit epsilon to max(t * 0.00015, 0.000005) so zooming close preserves crisp geometry
+          float eps = max(t * 0.00015, 0.000005) * u_epsilonScale;
 
-        // Deep-Zoom Adaptive Epsilon:
-        // Set hit epsilon to max(t * 0.00015, 0.000005) so zooming close preserves crisp geometry
-        float eps = max(t * 0.00015, 0.000005) * u_epsilonScale;
-
-        if (d < eps) {
-          hit = true;
-          hitTrap = trap;
-          break;
+          if (d < eps) {
+            hit = true;
+            hitTrap = trap;
+            break;
+          }
+          t += d * stepFudge;
         }
-        t += d * stepFudge;
-      }
 
-      vec3 col = getBackground(rd);
+        col = getBackground(rd);
 
-      if (hit) {
-        vec3 pos = ro + rd * t;
-        vec3 nor = calcNormal(pos, t);
+        if (hit) {
+          vec3 pos = ro + rd * t;
+          vec3 nor = calcNormal(pos, t);
 
-        // Directional key light with Blinn-Phong specular glints on metallic edges
-        vec3 keyDir = normalize(vec3(1.25, 1.75, 1.05));
-        float keyDiff = max(dot(nor, keyDir), 0.0);
-        float skyDiff = clamp(nor.y * 0.5 + 0.5, 0.0, 1.0) * 0.18;
+          // Directional key light with Blinn-Phong specular glints on metallic edges
+          vec3 keyDir = normalize(vec3(1.25, 1.75, 1.05));
+          float keyDiff = max(dot(nor, keyDir), 0.0);
+          float skyDiff = clamp(nor.y * 0.5 + 0.5, 0.0, 1.0) * 0.18;
 
-        // Contact Ambient Occlusion modulated by Crevice Shadow slider
-        float rawAO = calcAO(pos, nor);
-        float ao = pow(rawAO, u_aoContrast);
+          // Contact Ambient Occlusion modulated by Crevice Shadow slider
+          float rawAO = calcAO(pos, nor);
+          float ao = pow(rawAO, u_aoContrast);
 
-        // Blinn-Phong specular glints on metallic edges modulated by Surface Polish slider
-        vec3 halfVec = normalize(keyDir - rd);
-        float shininess = 24.0 * u_metallicPolish + 8.0;
-        float spec = pow(max(dot(nor, halfVec), 0.0), shininess);
-        float fresnel = pow(clamp(1.0 + dot(rd, nor), 0.0, 1.0), 3.5 / max(u_metallicPolish, 0.2));
+          // Soft Directional Penumbra Shadow
+          float shadow = 1.0;
+          if (u_softShadows > 0) {
+            shadow = calcSoftShadow(pos + nor * 0.006, keyDir, 0.015, 2.8, 14.0);
+            shadow = mix(0.18, 1.0, shadow);
+          }
 
-        // Surface palette color
-        vec3 specColor;
-        vec3 rimColor;
-        vec3 surface = getPaletteSurface(u_palette, hitTrap, specColor, rimColor);
+          // Blinn-Phong specular glints on metallic edges modulated by Surface Polish slider
+          vec3 halfVec = normalize(keyDir - rd);
+          float shininess = 24.0 * u_metallicPolish + 8.0;
+          float spec = pow(max(dot(nor, halfVec), 0.0), shininess);
+          float fresnel = pow(clamp(1.0 + dot(rd, nor), 0.0, 1.0), 3.5 / max(u_metallicPolish, 0.2));
 
-        // Direct lighting composition
-        vec3 lighting = (keyDiff * vec3(1.45, 1.38, 1.30) + skyDiff * vec3(0.35, 0.40, 0.50)) * ao;
-        col = surface * lighting;
+          // Geometric specular anti-aliasing (prevents micro-sparkle aliasing)
+          float specAtten = clamp(1.0 - t * 0.06, 0.2, 1.0);
 
-        // Metallic edges specular glints and silhouette rim scaled by Surface Polish slider
-        col += rimColor * fresnel * (0.55 * u_metallicPolish) * ao;
-        col += specColor * spec * (2.4 * u_metallicPolish) * ao;
+          // Surface palette color
+          vec3 specColor;
+          vec3 rimColor;
+          vec3 surface = getPaletteSurface(u_palette, hitTrap, specColor, rimColor);
 
-        // Subtle atmospheric depth fade
-        float fog = 1.0 - exp(-t * 0.06);
-        col = mix(col, getBackground(rd), fog);
+          // Direct lighting composition with soft shadow modulation
+          vec3 lighting = (keyDiff * shadow * vec3(1.50, 1.42, 1.34) + skyDiff * vec3(0.35, 0.40, 0.50)) * ao;
+          col = surface * lighting;
+
+          // Realistic Image-Based Environment Reflection (IBL)
+          vec3 refDir = reflect(rd, nor);
+          vec3 envColor = getEnvironment(refDir, keyDir);
+          col += envColor * rimColor * (fresnel * 0.55 * u_metallicPolish) * ao;
+
+          // Metallic edges specular glints and silhouette rim scaled by Surface Polish slider
+          col += rimColor * fresnel * (0.50 * u_metallicPolish) * ao;
+          col += specColor * spec * (2.4 * u_metallicPolish * specAtten) * ao * shadow;
+
+          // Subsurface scattering / edge translucency on thin micro-lobes
+          float backLight = pow(clamp(dot(-rd, keyDir), 0.0, 1.0), 3.0);
+          float sss = backLight * (1.0 - rawAO) * 0.32 * u_metallicPolish;
+          col += rimColor * sss;
+
+          // Subtle atmospheric depth fade
+          float fog = 1.0 - exp(-t * 0.06);
+          col = mix(col, getBackground(rd), fog);
+        }
       }
 
       // Lens Vignette
@@ -1005,7 +1082,18 @@
       // Gamma Correction
       col = pow(clamp(col, 0.0, 1.0), vec3(1.0 / 2.2));
 
-      fragColor = vec4(col, 1.0);
+      // Screen-Space Dithering (eliminates 8-bit banding in dark gradients)
+      float dither = (fract(sin(dot(gl_FragCoord.xy + float(u_sampleIndex) * 7.13, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
+      col += dither;
+
+      // Progressive Multi-Sample Accumulation (Temporal Anti-Aliasing)
+      if (u_sampleIndex > 0) {
+        vec3 prev = texelFetch(u_prevTex, ivec2(gl_FragCoord.xy), 0).rgb;
+        float blend = 1.0 / float(u_sampleIndex + 1);
+        col = mix(prev, col, blend);
+      }
+
+      fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
     }
   </script>
 
@@ -1018,8 +1106,8 @@
       const state = {
         equation: 0,            // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
         palette: 0,             // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Magma
-        renderScale: 0.65,       // Bootstrap 0.65x
         fov: 54.0,
+        fidelityMode: 'auto',   // 'auto' (Auto 60FPS), 'ultra' (Retina 2.0x), 'perf' (Fast)
         // Camera spherical coords
         yaw: 0.8,
         pitch: 0.35,
@@ -1152,23 +1240,86 @@
       const uScalePowerLocation     = gl.getUniformLocation(prog, 'u_scalePower');
       const uMetallicPolishLocation = gl.getUniformLocation(prog, 'u_metallicPolish');
       const uAoContrastLocation     = gl.getUniformLocation(prog, 'u_aoContrast');
+      const uPrevTexLocation        = gl.getUniformLocation(prog, 'u_prevTex');
+      const uSampleIndexLocation    = gl.getUniformLocation(prog, 'u_sampleIndex');
+      const uJitterLocation         = gl.getUniformLocation(prog, 'u_jitter');
+      const uSoftShadowsLocation    = gl.getUniformLocation(prog, 'u_softShadows');
 
-      // Automated Adaptive Performance Governor
+      // Ping-Pong Accumulation Buffer Pipeline for Progressive TAA & Super-Resolution
+      let accumTex = [null, null];
+      let accumFBO = [null, null];
+      let accumIndex = 0;
+      let sampleCount = 0;
+      let accumW = 0;
+      let accumH = 0;
+
+      // Check if EXT_color_buffer_float is supported for 16-bit float accumulation
+      let accumInternalFormat = gl.RGBA8;
+      let accumTexType = gl.UNSIGNED_BYTE;
+      try {
+        if (gl.getExtension('EXT_color_buffer_float')) {
+          accumInternalFormat = gl.RGBA16F;
+          accumTexType = gl.HALF_FLOAT;
+        }
+      } catch (_) {}
+
+      function resizeAccumBuffers(w, h) {
+        if (accumW === w && accumH === h && accumTex[0] && accumFBO[0]) return;
+        accumW = w;
+        accumH = h;
+        sampleCount = 0;
+
+        for (let i = 0; i < 2; i++) {
+          if (!accumTex[i]) accumTex[i] = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, accumTex[i]);
+          gl.texImage2D(gl.TEXTURE_2D, 0, accumInternalFormat, w, h, 0, gl.RGBA, accumTexType, null);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+          if (!accumFBO[i]) accumFBO[i] = gl.createFramebuffer();
+          gl.bindFramebuffer(gl.FRAMEBUFFER, accumFBO[i]);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, accumTex[i], 0);
+
+          const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+          if (status !== gl.FRAMEBUFFER_COMPLETE && accumInternalFormat !== gl.RGBA8) {
+            accumInternalFormat = gl.RGBA8;
+            accumTexType = gl.UNSIGNED_BYTE;
+            gl.texImage2D(gl.TEXTURE_2D, 0, accumInternalFormat, w, h, 0, gl.RGBA, accumTexType, null);
+          }
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+      }
+
+      function halton(index, base) {
+        let f = 1;
+        let r = 0;
+        let i = index;
+        while (i > 0) {
+          f = f / base;
+          r = r + f * (i % base);
+          i = Math.floor(i / base);
+        }
+        return r;
+      }
+
+      // Automated Adaptive Performance Governor with High-DPI / Retina Awareness
       class AdaptivePerformanceGovernor {
         constructor() {
-          // Lightweight Bootstrap Mode (0.65x)
-          this.renderScale = 0.65;     // Initial render scale: 0.65x
-          this.targetScale = 0.65;
-          this.maxSteps = 28;          // Initial max ray steps: 28
-          this.iterPenalty = 0;        // Iteration reduction when overloaded
-          this.aoTaps = 2;             // Crisp lightweight contact AO
+          this.renderScale = 0.85;     // Interactive scale relative to capped DPR
+          this.targetScale = 0.85;
+          this.maxSteps = 32;          // Ray steps budget
+          this.iterPenalty = 0;
+          this.aoTaps = 2;
           this.stepMultiplier = 0.85;
           this.epsilonScale = 1.0;
 
           // Monitoring State
           this.rollingDt = 16.6;
           this.lastFrameTime = performance.now();
-          this.under14msDuration = 0;   // Accumulated time under 14ms (ms)
+          this.under14msDuration = 0;
           this.lastStepReduceTime = 0;
         }
 
@@ -1176,88 +1327,95 @@
           const dt = now - this.lastFrameTime;
           this.lastFrameTime = now;
 
-          // Filter outliers (app pause, tab switch)
           if (dt > 120 || dt <= 0) {
             this.rollingDt = 16.6;
             this.under14msDuration = 0;
             return;
           }
 
-          // Measure rolling frame delta
           this.rollingDt = 0.15 * dt + 0.85 * this.rollingDt;
 
           const baseFudge = (equation === 0 || equation === 4) ? 0.85 : 0.78;
           this.stepMultiplier = baseFudge;
 
-          // 1. FRAME TIME EXCEEDS 16.7ms (FPS < 58) -> DOWNGRADE
-          if (this.rollingDt > 16.7) {
-            this.under14msDuration = 0; // Reset recovery timer
+          if (state.fidelityMode === 'ultra') {
+            this.targetScale = 1.0;
+            this.renderScale = 1.0;
+            this.maxSteps = isInteracting ? 42 : 54;
+            this.aoTaps = 3;
+            this.iterPenalty = 0;
+            return;
+          }
 
-            // Automatically decrement internal canvas resolution scale (down to 0.35x)
-            this.targetScale = Math.max(0.35, this.targetScale - 0.02);
+          if (state.fidelityMode === 'perf') {
+            this.targetScale = 0.65;
+            this.renderScale = 0.65;
+            this.maxSteps = 24;
+            this.aoTaps = 1;
+            return;
+          }
+
+          // 'auto' Self-Regulating Governor
+          if (this.rollingDt > 16.7) {
+            this.under14msDuration = 0;
+            this.targetScale = Math.max(0.60, this.targetScale - 0.025);
             this.renderScale = this.targetScale;
 
-            // Reduce ray steps by 2 until solid 60 FPS is restored (min 16 steps)
             if (now - this.lastStepReduceTime > 250) {
-              if (this.maxSteps > 18) {
+              if (this.maxSteps > 22) {
                 this.maxSteps -= 2;
               } else if (this.iterPenalty < 3) {
                 this.iterPenalty++;
               }
               this.lastStepReduceTime = now;
             }
-          }
-          // 2. FRAME TIME RELIABLY UNDER 14ms -> SCALE UP ONLY AFTER 3 SECONDS
-          else if (this.rollingDt < 14.0 && !isInteracting) {
+          } else if (this.rollingDt < 14.0 && !isInteracting) {
             this.under14msDuration += dt;
-
-            // Only scale up quality if frame time has remained reliably under 14ms for at least 3 seconds
-            if (this.under14msDuration >= 3000) {
+            if (this.under14msDuration >= 2000) {
               if (this.iterPenalty > 0) {
                 this.iterPenalty--;
-              } else if (this.targetScale < 0.75) {
-                this.targetScale = Math.min(0.75, this.targetScale + 0.05);
-                this.renderScale = this.targetScale;
-              } else if (this.maxSteps < 44) {
-                this.maxSteps += 2;
-              } else if (this.aoTaps < 3) {
-                this.aoTaps = 3;
               } else if (this.targetScale < 1.0) {
                 this.targetScale = Math.min(1.0, this.targetScale + 0.05);
                 this.renderScale = this.targetScale;
+              } else if (this.maxSteps < 48) {
+                this.maxSteps += 2;
+              } else if (this.aoTaps < 3) {
+                this.aoTaps = 3;
               }
-
-              // Partially reset so next tier requires another period of sustained headroom
-              this.under14msDuration = 1000;
+              this.under14msDuration = 800;
             }
-          }
-          // 3. TARGET SWEET SPOT: 14.0ms - 16.7ms (SOLID LOCKED 60 FPS)
-          else {
+          } else {
             this.under14msDuration = Math.max(0, this.under14msDuration - dt * 0.5);
           }
         }
 
-        applyCanvasResolution(gl, canvas) {
-          const w = window.innerWidth;
-          const h = window.innerHeight;
-          const scale = this.renderScale;
+        applyCanvasResolution(gl, canvas, isInteracting) {
+          const rawDpr = window.devicePixelRatio || 1;
+          let dprCap = 1.75;
+          if (state.fidelityMode === 'ultra') dprCap = 2.0;
+          if (state.fidelityMode === 'perf')  dprCap = 1.0;
+          const dpr = Math.min(rawDpr, dprCap);
 
-          // Quantize to multiples of 4 to prevent continuous GPU buffer reallocations
-          const targetW = Math.max(120, Math.round((w * scale) / 4) * 4);
-          const targetH = Math.max(120, Math.round((h * scale) / 4) * 4);
+          const baseW = window.innerWidth * dpr;
+          const baseH = window.innerHeight * dpr;
 
-          // Deadband: only reallocate framebuffer when delta >= 4px
+          // When camera rests and settles, scale elevates to 1.0 (Retina native)
+          const effScale = isInteracting ? this.renderScale : Math.max(this.renderScale, 1.0);
+
+          const targetW = Math.max(160, Math.round((baseW * effScale) / 4) * 4);
+          const targetH = Math.max(160, Math.round((baseH * effScale) / 4) * 4);
+
           if (Math.abs(canvas.width - targetW) >= 4 || Math.abs(canvas.height - targetH) >= 4) {
             canvas.width = targetW;
             canvas.height = targetH;
-            gl.viewport(0, 0, targetW, targetH);
+            resizeAccumBuffers(targetW, targetH);
           }
         }
       }
 
       const governor = new AdaptivePerformanceGovernor();
-      window.addEventListener('resize', () => governor.applyCanvasResolution(gl, canvas), { passive: true });
-      governor.applyCanvasResolution(gl, canvas);
+      window.addEventListener('resize', () => governor.applyCanvasResolution(gl, canvas, false), { passive: true });
+      governor.applyCanvasResolution(gl, canvas, false);
 
       // Camera Calculation
       function getCameraPosition() {
@@ -1278,11 +1436,13 @@
         state.targetPitch = cfg.defaultPitch;
         state.targetDist = cfg.defaultDist;
         state.camTarget = cfg.camTarget.slice();
+        sampleCount = 0;
       }
 
       // Minimalist Top Bar Telemetry & Auto-Hiding
       const fpsValEl = document.getElementById('fps-val');
       const resValEl = document.getElementById('res-val');
+      const aaValEl  = document.getElementById('aa-val');
       const topBarEl = document.getElementById('top-bar');
       let telemetryTimer = performance.now();
       let idleTimer = null;
@@ -1292,7 +1452,7 @@
         clearTimeout(idleTimer);
         idleTimer = setTimeout(() => {
           if (topBarEl) topBarEl.classList.add('hidden');
-        }, 3000);
+        }, 3500);
       }
 
       window.addEventListener('pointerdown', resetIdleTimer, { passive: true });
@@ -1302,24 +1462,45 @@
       resetIdleTimer();
 
       function updateHUDTelemetry(now) {
-        if (now - telemetryTimer < 250) return;
+        if (now - telemetryTimer < 200) return;
         telemetryTimer = now;
 
         const fps = Math.round(1000 / Math.max(governor.rollingDt, 1));
         const ms = governor.rollingDt.toFixed(1);
+        const maxSamples = state.fidelityMode === 'ultra' ? 32 : (state.fidelityMode === 'perf' ? 12 : 24);
+
         if (fpsValEl) {
-          fpsValEl.textContent = `${fps} FPS • ${ms}ms`;
-          if (fps >= 55) {
-            fpsValEl.style.color = '#10b981';
-          } else if (fps >= 40) {
-            fpsValEl.style.color = '#f59e0b';
+          if (sampleCount >= maxSamples && !isPointerDown) {
+            fpsValEl.textContent = 'PRISTINE';
+            fpsValEl.style.color = '#38bdf8';
           } else {
-            fpsValEl.style.color = '#ef4444';
+            fpsValEl.textContent = `${fps} FPS • ${ms}ms`;
+            if (fps >= 55) {
+              fpsValEl.style.color = '#10b981';
+            } else if (fps >= 40) {
+              fpsValEl.style.color = '#f59e0b';
+            } else {
+              fpsValEl.style.color = '#ef4444';
+            }
           }
         }
 
         if (resValEl) {
-          resValEl.textContent = `${(governor.renderScale).toFixed(2)}x (${governor.maxSteps} steps)`;
+          const dprEff = (canvas.width / window.innerWidth).toFixed(1);
+          resValEl.textContent = `${canvas.width}×${canvas.height} (${dprEff}x)`;
+        }
+
+        if (aaValEl) {
+          if (sampleCount >= maxSamples) {
+            aaValEl.textContent = `${maxSamples}x TAA`;
+            aaValEl.style.color = '#10b981';
+          } else if (sampleCount > 0) {
+            aaValEl.textContent = `TAA ${sampleCount}x`;
+            aaValEl.style.color = '#a78bfa';
+          } else {
+            aaValEl.textContent = 'Motion';
+            aaValEl.style.color = 'rgba(255, 255, 255, 0.45)';
+          }
         }
       }
 
@@ -1339,6 +1520,7 @@
 
       canvas.addEventListener('pointerdown', (e) => {
         activeTouches.set(e.pointerId, e);
+        sampleCount = 0;
         if (activeTouches.size === 1) {
           isPointerDown = true;
           lastPointerX = e.clientX;
@@ -1354,6 +1536,7 @@
       canvas.addEventListener('pointermove', (e) => {
         if (!activeTouches.has(e.pointerId)) return;
         activeTouches.set(e.pointerId, e);
+        sampleCount = 0;
 
         if (activeTouches.size === 1 && isPointerDown) {
           const dx = e.clientX - lastPointerX;
@@ -1379,6 +1562,7 @@
 
       function endPointer(e) {
         activeTouches.delete(e.pointerId);
+        sampleCount = 0;
         if (activeTouches.size === 0) {
           isPointerDown = false;
           touchPinchStartDist = null;
@@ -1396,6 +1580,7 @@
       // Desktop Mouse Wheel Zoom with Deep-Zoom Support
       canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
+        sampleCount = 0;
         const cfg = eqConfigs[state.equation];
         const zoomDelta = Math.sign(e.deltaY) * 0.08 * state.targetDist;
         state.targetDist = Math.max(cfg.minDist, Math.min(cfg.maxDist, state.targetDist + zoomDelta));
@@ -1431,6 +1616,40 @@
       const btnResetSliders = document.getElementById('btn-reset-sliders');
       const btnRandomSliders = document.getElementById('btn-random-sliders');
 
+      // Fidelity Mode Switcher ('auto' -> 'ultra' -> 'perf')
+      const btnFidelity   = document.getElementById('btn-fidelity');
+      const fidelityLabel = document.getElementById('fidelity-label');
+
+      function updateFidelityUI() {
+        if (!fidelityLabel) return;
+        if (state.fidelityMode === 'ultra') {
+          fidelityLabel.textContent = 'Ultra HD';
+          if (btnFidelity) btnFidelity.style.borderColor = 'var(--accent)';
+        } else if (state.fidelityMode === 'perf') {
+          fidelityLabel.textContent = 'Fast 60';
+          if (btnFidelity) btnFidelity.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+        } else {
+          fidelityLabel.textContent = 'Auto HD';
+          if (btnFidelity) btnFidelity.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+        }
+      }
+
+      if (btnFidelity) {
+        btnFidelity.addEventListener('click', () => {
+          if (state.fidelityMode === 'auto') {
+            state.fidelityMode = 'ultra';
+          } else if (state.fidelityMode === 'ultra') {
+            state.fidelityMode = 'perf';
+          } else {
+            state.fidelityMode = 'auto';
+          }
+          updateFidelityUI();
+          sampleCount = 0;
+          governor.applyCanvasResolution(gl, canvas, false);
+          resetIdleTimer();
+        });
+      }
+
       function updateScaleSliderUI() {
         const spCfg = eqConfigs[state.equation].scalePower;
         if (!sliderScale) return;
@@ -1456,6 +1675,7 @@
         if (eqSelect) eqSelect.value = eq;
         state.scalePower = eqConfigs[eq].scalePower.val;
         state.morph = eqConfigs[eq].morphDefault;
+        sampleCount = 0;
         updateScaleSliderUI();
         updateMorphSliderUI();
         resetCamera();
@@ -1466,6 +1686,7 @@
       if (sliderMorph) {
         sliderMorph.addEventListener('input', (e) => {
           state.morph = parseFloat(e.target.value);
+          sampleCount = 0;
           if (valMorphEl) valMorphEl.textContent = (state.morph >= 0 ? '+' : '') + state.morph.toFixed(2);
           resetIdleTimer();
         });
@@ -1476,6 +1697,7 @@
         sliderScale.addEventListener('input', (e) => {
           state.scalePower = parseFloat(e.target.value);
           eqConfigs[state.equation].scalePower.val = state.scalePower;
+          sampleCount = 0;
           const spCfg = eqConfigs[state.equation].scalePower;
           if (valScaleEl) valScaleEl.textContent = `${spCfg.name} ${state.scalePower.toFixed(spCfg.decimals)}`;
           resetIdleTimer();
@@ -1486,6 +1708,7 @@
       if (sliderIter) {
         sliderIter.addEventListener('input', (e) => {
           state.maxIter = parseInt(e.target.value, 10);
+          sampleCount = 0;
           if (valIterEl) valIterEl.textContent = `${state.maxIter} iter`;
           resetIdleTimer();
         });
@@ -1495,6 +1718,7 @@
       if (sliderPolish) {
         sliderPolish.addEventListener('input', (e) => {
           state.metallicPolish = parseFloat(e.target.value);
+          sampleCount = 0;
           if (valPolishEl) valPolishEl.textContent = `${state.metallicPolish.toFixed(1)}x`;
           resetIdleTimer();
         });
@@ -1504,6 +1728,7 @@
       if (sliderShadow) {
         sliderShadow.addEventListener('input', (e) => {
           state.aoContrast = parseFloat(e.target.value);
+          sampleCount = 0;
           if (valShadowEl) valShadowEl.textContent = `${state.aoContrast.toFixed(1)}x`;
           resetIdleTimer();
         });
@@ -1511,7 +1736,7 @@
 
       // Prevent slider touches from causing camera orbit/pinch
       const stopSliderProp = (e) => e.stopPropagation();
-      [sliderMorph, sliderScale, sliderIter, sliderPolish, sliderShadow, tuningPanelEl, eqSelect].forEach(el => {
+      [sliderMorph, sliderScale, sliderIter, sliderPolish, sliderShadow, tuningPanelEl, eqSelect, btnFidelity].forEach(el => {
         if (!el) return;
         el.addEventListener('pointerdown', stopSliderProp, { passive: true });
         el.addEventListener('pointermove', stopSliderProp, { passive: true });
@@ -1538,6 +1763,7 @@
           state.maxIter = 6;
           state.metallicPolish = 1.5;
           state.aoContrast = 1.8;
+          sampleCount = 0;
 
           if (sliderIter) sliderIter.value = 6;
           if (sliderPolish) sliderPolish.value = 1.5;
@@ -1566,6 +1792,7 @@
 
           state.metallicPolish = parseFloat((0.5 + Math.random() * 2.2).toFixed(1));
           state.aoContrast = parseFloat((1.0 + Math.random() * 2.0).toFixed(1));
+          sampleCount = 0;
 
           if (sliderPolish) sliderPolish.value = state.metallicPolish;
           if (sliderShadow) sliderShadow.value = state.aoContrast;
@@ -1592,6 +1819,7 @@
         btn.addEventListener('click', () => {
           const pal = parseInt(btn.dataset.palette, 10);
           state.palette = pal;
+          sampleCount = 0;
           palBtns.forEach(b => b.classList.toggle('active', b === btn));
           resetIdleTimer();
         });
@@ -1612,9 +1840,10 @@
         if (hint) hint.style.opacity = '0';
       }, 4500);
 
-      // Initialize Sliders UI
+      // Initialize Sliders & Fidelity UI
       updateScaleSliderUI();
       updateMorphSliderUI();
+      updateFidelityUI();
 
       // Render Loop
       const startTime = performance.now();
@@ -1627,21 +1856,62 @@
         const dPitch = Math.abs(state.targetPitch - state.pitch);
         const dDist = Math.abs(state.targetDist - state.dist);
         const dInertia = dYaw + dPitch + dDist;
-        const isInteracting = isPointerDown || dInertia > 0.005;
+        const isInteracting = isPointerDown || dInertia > 0.0008;
 
         // Smooth Camera Inertia Damping
         state.yaw += (state.targetYaw - state.yaw) * 0.16;
         state.pitch += (state.targetPitch - state.pitch) * 0.16;
         state.dist += (state.targetDist - state.dist) * 0.16;
 
+        if (isInteracting) {
+          sampleCount = 0;
+        }
+
+        const maxSamples = state.fidelityMode === 'ultra' ? 32 : (state.fidelityMode === 'perf' ? 12 : 24);
+
+        // Idle power-saving: if fully accumulated and completely still, skip heavy GPU raymarching
+        if (!isInteracting && sampleCount >= maxSamples) {
+          updateHUDTelemetry(now);
+          return;
+        }
+
         // Self-Regulating Performance Governor & Dynamic Resolution
         governor.update(now, isInteracting, state.equation);
-        governor.applyCanvasResolution(gl, canvas);
+        governor.applyCanvasResolution(gl, canvas, isInteracting);
         updateHUDTelemetry(now);
+
+        resizeAccumBuffers(canvas.width, canvas.height);
 
         const time = (now - startTime) * 0.001;
         const camPos = getCameraPosition();
         const activeIter = Math.max(3, state.maxIter - governor.iterPenalty);
+
+        // Soft shadows: enabled in Ultra HD, or when settled in Auto mode
+        const enableSoftShadows = (state.fidelityMode === 'ultra') || (!isInteracting && sampleCount > 0);
+
+        // Ping-Pong FBO selection
+        const srcIdx = accumIndex;
+        const dstIdx = 1 - accumIndex;
+
+        // Render to destination accumulation FBO
+        gl.bindFramebuffer(gl.FRAMEBUFFER, accumFBO[dstIdx]);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
+        // Bind source history texture
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, accumTex[srcIdx]);
+        gl.uniform1i(uPrevTexLocation, 0);
+        gl.uniform1i(uSampleIndexLocation, sampleCount);
+
+        // Subpixel jitter for Halton TAA
+        let jx = 0;
+        let jy = 0;
+        if (sampleCount > 0) {
+          jx = halton(sampleCount, 2) - 0.5;
+          jy = halton(sampleCount, 3) - 0.5;
+        }
+        gl.uniform2f(uJitterLocation, jx, jy);
+        gl.uniform1i(uSoftShadowsLocation, enableSoftShadows ? 1 : 0);
 
         gl.uniform2f(uResLocation, canvas.width, canvas.height);
         gl.uniform3fv(uCamPosLocation, camPos);
@@ -1661,6 +1931,20 @@
         gl.uniform1f(uAoContrastLocation, state.aoContrast);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        // Blit accumulated frame directly to canvas
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, accumFBO[dstIdx]);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+        gl.blitFramebuffer(
+          0, 0, canvas.width, canvas.height,
+          0, 0, canvas.width, canvas.height,
+          gl.COLOR_BUFFER_BIT, gl.NEAREST
+        );
+
+        accumIndex = dstIdx;
+        if (!isInteracting) {
+          sampleCount++;
+        }
       }
 
       requestAnimationFrame(render);

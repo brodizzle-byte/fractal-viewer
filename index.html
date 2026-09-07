@@ -600,10 +600,10 @@
             <option value="2">3. 4D Quaternion Julia</option>
             <option value="3">4. Apollonian Gasket (Spheres)</option>
             <option value="4">5. Menger / Sierpinski Lattice</option>
-            <option value="5">6. Sierpinski Tetrahedron (Pyramid)</option>
-            <option value="6">7. 3D Burning Ship (Gothic Spire)</option>
-            <option value="7">8. Pseudo-Kleinian (Hyperbolic Shell)</option>
-            <option value="8">9. Kaliset Cosmic Coral (Cyber-Reef)</option>
+            <option value="5">6. Kali Fractal / Kaliset</option>
+            <option value="6">7. Sierpinski Tetrahedron IFS</option>
+            <option value="7">8. 3D Burning Ship Bulb</option>
+            <option value="8">9. Kleinian Inversion Spheres</option>
           </select>
         </div>
         <button id="btn-toggle-tuning" class="tuning-toggle-btn active" title="Toggle 5 Math & Visual Sliders">
@@ -786,10 +786,10 @@
       if (eq == 2) return 2.4; // Quaternion Julia
       if (eq == 3) return 2.9; // Apollonian Gasket
       if (eq == 4) return 2.4; // Menger Lattice
-      if (eq == 5) return 2.6; // Sierpinski Tetrahedron
-      if (eq == 6) return 2.8; // 3D Burning Ship
-      if (eq == 7) return 3.4; // Pseudo-Kleinian
-      return 2.8;              // Kaliset Cosmic Coral
+      if (eq == 5) return 2.9; // Kali Fractal / Kaliset
+      if (eq == 6) return 2.6; // Sierpinski Tetrahedron IFS
+      if (eq == 7) return 2.8; // 3D Burning Ship Bulb
+      return 3.4;              // Kleinian Inversion Spheres
     }
 
     // 1. Power-N Mandelbulb: Iconic bulbous lobes and sharp micro-filaments
@@ -923,50 +923,77 @@
       return d;
     }
 
-    // 6. Sierpinski Tetrahedron: Triangular pyramid IFS with sacred geometry facets
-    float deTetrahedron(vec3 p, float scaleFactor, float morph, out float trap) {
+    // 6. Kali Fractal / Kaliset: Absolute value spatial folding with sphere inversion and translation offsets
+    float deKali(vec3 p, float foldScale, float morph, out float trap) {
       vec3 z = p;
-      float scale = 1.0;
+      float dz = 1.0;
       trap = 1e10;
-      vec3 offset = vec3(1.0, 1.0, 1.0);
-      float sc = scaleFactor;
-
-      float ang = morph * 0.35;
-      float cosA = cos(ang);
-      float sinA = sin(ang);
-      mat2 rot = mat2(cosA, -sinA, sinA, cosA);
+      // Slider 1 & 2 wired to translation offset vector and fold scale
+      vec3 offset = vec3(0.55 + morph * 0.22, 0.68 + morph * 0.12, 0.82);
+      float sc = foldScale;
 
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
 
+        // Absolute value spatial folding
+        z = abs(z);
+
+        // Sphere inversion
+        float r2 = dot(z, z);
+        if (r2 < 0.0001) break;
+        float inv = sc / max(r2, 0.035);
+        z = z * inv - offset;
+        dz = dz * inv;
+
+        trap = min(trap, length(z.xz) * 0.6 + abs(z.y) * 0.4);
+      }
+      // Dense alien architecture, biological lattices, and gothic spires
+      float d = 0.5 * (length(z) - 0.35) / max(dz, 1e-4);
+      return max(d, length(p) - 2.9);
+    }
+
+    // 7. Sierpinski Tetrahedron IFS: Classic affine folding across diagonal tetrahedral symmetry planes
+    float deTetrahedron(vec3 p, float scaleFactor, float morph, out float trap) {
+      vec3 z = p;
+      float scale = 1.0;
+      trap = 1e10;
+      vec3 offset = vec3(1.0, 1.0, 1.0) * (1.0 + morph * 0.10);
+      float sc = scaleFactor; // Classic scaling factor 2.0
+
+      for (int i = 0; i < 14; i++) {
+        if (i >= u_maxIter) break;
+
+        // Classic affine folding across diagonal tetrahedral symmetry planes
         if (z.x + z.y < 0.0) z.xy = -z.yx;
         if (z.x + z.z < 0.0) z.xz = -z.zx;
         if (z.y + z.z < 0.0) z.yz = -z.zy;
 
-        z.xz = rot * z.xz;
-
+        // Affine scaling and offset translation
         z = z * sc - offset * (sc - 1.0);
         scale *= sc;
 
-        trap = min(trap, length(z.xy) * 0.45 + abs(z.z) * 0.55);
+        trap = min(trap, length(z - offset));
       }
-      return (length(z) - 1.35) / max(scale, 1e-4);
+      // Clean, geometric crystalline pyramid lattices with negative interior space
+      return (length(z) - 1.4142) / max(scale, 1e-4);
     }
 
-    // 7. 3D Burning Ship: Flaming gothic towers, ribbed hulls, and needle spires
+    // 8. 3D Burning Ship Bulb: Mandelbulb variant utilizing absolute-value coordinate components (|x|, |y|, |z|)
     float deBurningShip(vec3 p, float power, float morph, out float trap) {
       vec3 w = p;
-      w.y += morph * 0.15;
+      w.z += morph * 0.12;
       float dz = 1.0;
       float r = 0.0;
       trap = 1e10;
 
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
+
+        // Absolute-value coordinate components (|x|, |y|, |z|) prior to spherical power transformations
         w = abs(w);
 
         r = length(w);
-        trap = min(trap, abs(w.y - w.x) * 0.7 + abs(w.z) * 0.5);
+        trap = min(trap, abs(w.z) * 0.75 + length(w.xy) * 0.35);
         if (r > 3.2) break;
 
         float theta = acos(clamp(w.z / max(r, 1e-6), -1.0, 1.0));
@@ -977,56 +1004,45 @@
         theta *= power;
         phi *= power;
 
+        // Sharp needle-like masts, razor crests, and jagged organic ridges
         w = rPow * vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)) + p;
       }
       return 0.5 * log(max(r, 1.0001)) * r / max(dz, 1e-6);
     }
 
-    // 8. Pseudo-Kleinian: Hyperbolic limit set with interlocking spirals and baroque shells
-    float dePseudoKleinian(vec3 p, float scaleFactor, float morph, out float trap) {
+    // 9. Kleinian Group / Inversion Spheres (Jos Leys formula): Iterated sphere inversion limit sets with box-folding
+    float deKleinian(vec3 p, float scaleFactor, float morph, out float trap) {
       vec3 z = p;
       float scale = 1.0;
       trap = 1e10;
-      vec3 c = vec3(0.08 + morph * 0.08, 0.42, 0.12);
-      float boxLimit = 1.1;
+
+      // Jos Leys formula with box-folding
+      vec3 box = vec3(0.95, 0.95, 0.95);
+      vec3 c = vec3(0.18 + morph * 0.12, 0.46, 0.18);
+      float rMin2 = 0.25;
+      float rMax2 = 1.0;
 
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
-        z.x = clamp(z.x, -boxLimit, boxLimit) * 2.0 - z.x;
-        z.y = clamp(z.y, -boxLimit, boxLimit) * 2.0 - z.y;
 
+        // Box-folding
+        z = clamp(z, -box, box) * 2.0 - z;
+
+        // Iterated sphere inversion (Jos Leys formula)
         float r2 = dot(z, z);
-        float k = max(scaleFactor / max(r2, 0.22), 0.45);
+        float k = scaleFactor / clamp(r2, rMin2, rMax2);
         z *= k;
         scale *= k;
 
+        // Translation offset
         z += c;
-        trap = min(trap, r2);
-      }
-      float d = (length(z.xy) - 0.25) / max(scale, 1e-5);
-      return max(d, length(p) - 3.2);
-    }
 
-    // 9. Kaliset Cosmic Coral: Organic cyber-reef with recursive dendritic crystals
-    float deKaliset(vec3 p, float scaleFactor, float morph, out float trap) {
-      vec3 z = p;
-      float dz = 1.0;
-      trap = 1e10;
-      vec3 c = vec3(0.55 + morph * 0.1, 0.65, 0.82);
-      float sc = scaleFactor;
-
-      for (int i = 0; i < 14; i++) {
-        if (i >= u_maxIter) break;
-        z = abs(z);
-        float r2 = dot(z, z);
-        if (r2 < 0.001) break;
-        float inv = sc / max(r2, 0.04);
-        z = z * inv - c;
-        dz = dz * inv;
-        trap = min(trap, length(z.xz));
+        // Orbit trap for dense interlocking beaded rings & tubular cages
+        trap = min(trap, abs(length(z.xy) - 0.65) + abs(z.z) * 0.35);
       }
-      float d = 0.5 * (length(z) - 0.35) / max(dz, 1e-4);
-      return max(d, length(p) - 2.8);
+      // Dense hyperbolic interlocking beaded rings and tubular fractal cages
+      float d = (length(z.xz) - 0.20) / max(scale, 1e-5);
+      return max(d, length(p) - 3.4);
     }
 
     // Master distance evaluator
@@ -1042,13 +1058,13 @@
       } else if (u_equation == 4) {
         return deMenger(p, u_scalePower, u_morph, trap);
       } else if (u_equation == 5) {
-        return deTetrahedron(p, u_scalePower, u_morph, trap);
+        return deKali(p, u_scalePower, u_morph, trap);
       } else if (u_equation == 6) {
-        return deBurningShip(p, u_scalePower, u_morph, trap);
+        return deTetrahedron(p, u_scalePower, u_morph, trap);
       } else if (u_equation == 7) {
-        return dePseudoKleinian(p, u_scalePower, u_morph, trap);
+        return deBurningShip(p, u_scalePower, u_morph, trap);
       } else {
-        return deKaliset(p, u_scalePower, u_morph, trap);
+        return deKleinian(p, u_scalePower, u_morph, trap);
       }
     }
 
@@ -1366,31 +1382,31 @@
           morphDefault: 0.0
         },
         {
-          name: 'Sierpinski Tetrahedron',
+          name: 'Kali Fractal / Kaliset',
+          defaultDist: 2.9,  minDist: 0.002, maxDist: 6.5, defaultYaw: 0.65, defaultPitch: 0.35,
+          camTarget: [0, 0, 0],
+          scalePower: { name: 'Fold Scale', val: 1.35, min: 0.8, max: 2.2, step: 0.05, decimals: 2 },
+          morphDefault: 0.0
+        },
+        {
+          name: 'Sierpinski Tetrahedron IFS',
           defaultDist: 2.8,  minDist: 0.002, maxDist: 6.5, defaultYaw: 0.75, defaultPitch: 0.40,
           camTarget: [0, 0, 0],
           scalePower: { name: 'Scale', val: 2.0, min: 1.6, max: 2.4, step: 0.02, decimals: 2 },
           morphDefault: 0.0
         },
         {
-          name: '3D Burning Ship',
+          name: '3D Burning Ship Bulb',
           defaultDist: 2.8,  minDist: 0.002, maxDist: 6.0, defaultYaw: 0.85, defaultPitch: 0.30,
           camTarget: [0, 0, 0],
           scalePower: { name: 'Power', val: 8.0, min: 3.0, max: 12.0, step: 0.1, decimals: 1 },
           morphDefault: 0.0
         },
         {
-          name: 'Pseudo-Kleinian',
+          name: 'Kleinian Inversion Spheres',
           defaultDist: 3.5,  minDist: 0.002, maxDist: 7.5, defaultYaw: 0.75, defaultPitch: 0.40,
           camTarget: [0, 0, 0],
           scalePower: { name: 'Scale', val: 1.75, min: 1.1, max: 2.6, step: 0.05, decimals: 2 },
-          morphDefault: 0.0
-        },
-        {
-          name: 'Kaliset Cosmic Coral',
-          defaultDist: 2.9,  minDist: 0.002, maxDist: 6.5, defaultYaw: 0.65, defaultPitch: 0.35,
-          camTarget: [0, 0, 0],
-          scalePower: { name: 'Scale', val: 1.35, min: 0.8, max: 2.0, step: 0.05, decimals: 2 },
           morphDefault: 0.0
         }
       ];
@@ -2083,7 +2099,7 @@
       if (btnResetSliders) {
         btnResetSliders.addEventListener('click', () => {
           const cfg = eqConfigs[state.equation];
-          const defaultScalePowers = [8.0, -2.2, 1.2, 1.8, 3.0, 2.0, 8.0, 1.75, 1.35];
+          const defaultScalePowers = [8.0, -2.2, 1.2, 1.8, 3.0, 1.35, 2.0, 8.0, 1.75];
           state.scalePower = defaultScalePowers[state.equation] !== undefined ? defaultScalePowers[state.equation] : 2.0;
           cfg.scalePower.val = state.scalePower;
           state.maxIter = 6;

@@ -237,8 +237,8 @@
     /* Palette chips row */
     .palette-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
       width: 100%;
       align-items: center;
     }
@@ -247,14 +247,14 @@
       background: rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 10px;
-      padding: 5px 6px;
+      padding: 5px 4px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
       color: var(--text-muted);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
       transition: all 0.15s ease;
       touch-action: manipulation;
@@ -292,6 +292,14 @@
     .swatch-magma {
       background: linear-gradient(135deg, #ef4444, #f97316);
       box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+    .swatch-spectral {
+      background: linear-gradient(135deg, #f43f5e, #eab308, #06b6d4, #a855f7);
+      box-shadow: 0 0 6px rgba(168, 85, 247, 0.6);
+    }
+    .swatch-aurora {
+      background: linear-gradient(135deg, #10b981, #06b6d4, #6366f1);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
     }
 
     .tuning-toggle-btn {
@@ -522,7 +530,7 @@
         display: none;
       }
       .palette-row {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(6, 1fr);
       }
       .tuning-grid {
         grid-template-columns: 1fr;
@@ -628,17 +636,25 @@
           <span class="color-swatch swatch-gold"></span>
           <span>Obsidian</span>
         </button>
-        <button class="palette-chip" data-palette="1" title="Deep Neon Cyan">
+        <button class="palette-chip" data-palette="1" title="Cyber Neon Cyan">
           <span class="color-swatch swatch-cyan"></span>
           <span>Cyan</span>
         </button>
-        <button class="palette-chip" data-palette="2" title="Pearlescent Porcelain">
+        <button class="palette-chip" data-palette="2" title="Pearlescent Opal">
           <span class="color-swatch swatch-porcelain"></span>
           <span>Porcelain</span>
         </button>
         <button class="palette-chip" data-palette="3" title="Crimson Magma">
           <span class="color-swatch swatch-magma"></span>
           <span>Magma</span>
+        </button>
+        <button class="palette-chip" data-palette="4" title="Cosmic Spectral Prism">
+          <span class="color-swatch swatch-spectral"></span>
+          <span>Spectral</span>
+        </button>
+        <button class="palette-chip" data-palette="5" title="Ethereal Polar Aurora">
+          <span class="color-swatch swatch-aurora"></span>
+          <span>Aurora</span>
         </button>
       </div>
 
@@ -744,7 +760,7 @@
     uniform float     u_fov;
     uniform float     u_time;
     uniform int       u_equation;       // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
-    uniform int       u_palette;        // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Crimson Magma
+    uniform int       u_palette;        // 0: Obsidian & Gold, 1: Cyan, 2: Porcelain, 3: Magma, 4: Spectral, 5: Aurora
     uniform int       u_maxSteps;       // Dynamic raymarching step budget
     uniform int       u_maxIter;        // Dynamic fractal iteration budget (3 to 14)
     uniform int       u_aoTaps;         // Dynamic AO tap count (1 to 3)
@@ -793,17 +809,20 @@
     }
 
     // 1. Power-N Mandelbulb: Iconic bulbous lobes and sharp micro-filaments
-    float deMandelbulb(vec3 p, float power, float morph, out float trap) {
+    float deMandelbulb(vec3 p, float power, float morph, out vec4 trap) {
       vec3 w = p;
       w.z += morph * 0.12;
       float dz = 1.0;
       float r = 0.0;
-      trap = 1e10;
+      trap = vec4(1e10);
 
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
         r = length(w);
-        trap = min(trap, abs(w.z) * 0.85 + length(w.xy) * 0.35);
+        trap.x = min(trap.x, abs(w.z) * 0.85 + length(w.xy) * 0.35);
+        trap.y = min(trap.y, abs(w.x * w.y));
+        trap.z = min(trap.z, r);
+        trap.w = min(trap.w, length(cross(w, vec3(0.0, 0.0, 1.0))));
         if (r > 3.0) break;
 
         float theta = acos(clamp(w.z / max(r, 1e-6), -1.0, 1.0));
@@ -820,11 +839,11 @@
     }
 
     // 2. Architectural Mandelbox: Recursive pillars and geometric halls
-    float deMandelbox(vec3 p, float boxScale, float morph, out float trap) {
+    float deMandelbox(vec3 p, float boxScale, float morph, out vec4 trap) {
       vec3 offset = p;
       vec3 z = p;
       float dz = 1.0;
-      trap = 1e10;
+      trap = vec4(1e10);
       float scale = boxScale;
       float foldLimit = clamp(1.0 + morph * 0.2, 0.6, 1.4);
       const float minR2 = 0.25;
@@ -850,18 +869,21 @@
         z = scale * z + offset;
         dz = dz * abs(scale) + 1.0;
 
-        trap = min(trap, length(z.xz));
+        trap.x = min(trap.x, length(z.xz));
+        trap.y = min(trap.y, abs(z.y));
+        trap.z = min(trap.z, r2);
+        trap.w = min(trap.w, max(abs(z.x), max(abs(z.y), abs(z.z))));
       }
       return (length(z) - 0.05) / max(abs(dz), 1e-5);
     }
 
     // 3. 4D Quaternion Julia: Smooth, alien hyper-dimensional spirals
-    float deQuaternionJulia(vec3 p, float scalePower, float morph, out float trap) {
+    float deQuaternionJulia(vec3 p, float scalePower, float morph, out vec4 trap) {
       vec4 z = vec4(p, morph * 0.45);
       vec4 c = vec4(-0.38, 0.52, 0.25, -0.18 + morph * 0.12) * (scalePower * 0.8);
       float dz2 = 1.0;
       float r2 = 0.0;
-      trap = 1e10;
+      trap = vec4(1e10);
 
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
@@ -874,23 +896,29 @@
           2.0 * z.x * z.yzw
         ) + c;
 
-        trap = min(trap, abs(z.x * z.y) * 1.2 + length(z.zw) * 0.6);
+        trap.x = min(trap.x, abs(z.x * z.y) * 1.2 + length(z.zw) * 0.6);
+        trap.y = min(trap.y, abs(z.w));
+        trap.z = min(trap.z, r2);
+        trap.w = min(trap.w, abs(z.x - z.z) + abs(z.y - z.w));
       }
       return 0.35 * sqrt(r2 / max(dz2, 1e-6)) * log(max(r2, 1.0001));
     }
 
     // 4. Apollonian Gasket: Pure hollow spheres and nested orbits
-    float deApollonian(vec3 p, float scalePower, float morph, out float trap) {
+    float deApollonian(vec3 p, float scalePower, float morph, out vec4 trap) {
       vec3 z = p;
       float scale = 1.0;
-      trap = 1e10;
+      trap = vec4(1e10);
       float kParam = scalePower;
 
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
         z = -1.0 + 2.0 * fract(0.5 * z + 0.5);
         float r2 = dot(z, z);
-        trap = min(trap, r2);
+        trap.x = min(trap.x, r2);
+        trap.y = min(trap.y, abs(z.x - z.y));
+        trap.z = min(trap.z, length(z.yz));
+        trap.w = min(trap.w, abs(z.z));
         float k = max(kParam / max(r2, 0.001), 0.15);
         z *= k;
         scale *= k;
@@ -900,12 +928,12 @@
     }
 
     // 5. Menger / Sierpinski Lattice: Clean crystalline cubic windows with open negative space
-    float deMenger(vec3 p, float scalePower, float morph, out float trap) {
+    float deMenger(vec3 p, float scalePower, float morph, out vec4 trap) {
       vec3 z = p;
       vec3 b = abs(z) - vec3(1.0);
       float d = min(max(b.x, max(b.y, b.z)), 0.0) + length(max(b, 0.0));
       float s = 1.0;
-      trap = 1e10;
+      trap = vec4(1e10);
       float sc = scalePower;
 
       for (int i = 0; i < 14; i++) {
@@ -918,16 +946,19 @@
         float dc = max(r.z, r.x);
         float c = (min(da, min(db, dc)) - (1.0 + morph * 0.15)) / s;
         d = max(d, c);
-        trap = min(trap, length(r.xy) * 0.5 + abs(r.z) * 0.5);
+        trap.x = min(trap.x, length(r.xy) * 0.5 + abs(r.z) * 0.5);
+        trap.y = min(trap.y, min(abs(r.x), min(abs(r.y), abs(r.z))));
+        trap.z = min(trap.z, max(r.x, max(r.y, r.z)));
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));
       }
       return d;
     }
 
     // 6. Kali Fractal / Kaliset: Absolute value spatial folding with sphere inversion and translation offsets
-    float deKali(vec3 p, float foldScale, float morph, out float trap) {
+    float deKali(vec3 p, float foldScale, float morph, out vec4 trap) {
       vec3 z = p;
       float dz = 1.0;
-      trap = 1e10;
+      trap = vec4(1e10);
       // Slider 1 & 2 wired to translation offset vector and fold scale
       vec3 offset = vec3(0.55 + morph * 0.22, 0.68 + morph * 0.12, 0.82);
       float sc = foldScale;
@@ -945,7 +976,10 @@
         z = z * inv - offset;
         dz = dz * inv;
 
-        trap = min(trap, length(z.xz) * 0.6 + abs(z.y) * 0.4);
+        trap.x = min(trap.x, length(z.xz) * 0.6 + abs(z.y) * 0.4);
+        trap.y = min(trap.y, r2);
+        trap.z = min(trap.z, abs(z.x - z.z));
+        trap.w = min(trap.w, abs(z.x * z.y));
       }
       // Dense alien architecture, biological lattices, and gothic spires
       float d = 0.5 * (length(z) - 0.35) / max(dz, 1e-4);
@@ -953,10 +987,10 @@
     }
 
     // 7. Sierpinski Tetrahedron IFS: Classic affine folding across diagonal tetrahedral symmetry planes
-    float deTetrahedron(vec3 p, float scaleFactor, float morph, out float trap) {
+    float deTetrahedron(vec3 p, float scaleFactor, float morph, out vec4 trap) {
       vec3 z = p;
       float scale = 1.0;
-      trap = 1e10;
+      trap = vec4(1e10);
       vec3 offset = vec3(1.0, 1.0, 1.0) * (1.0 + morph * 0.10);
       float sc = scaleFactor; // Classic scaling factor 2.0
 
@@ -972,19 +1006,22 @@
         z = z * sc - offset * (sc - 1.0);
         scale *= sc;
 
-        trap = min(trap, length(z - offset));
+        trap.x = min(trap.x, length(z - offset));
+        trap.y = min(trap.y, abs(z.x + z.y));
+        trap.z = min(trap.z, abs(z.y + z.z));
+        trap.w = min(trap.w, dot(z, z) / (scale * scale + 1.0));
       }
       // Clean, geometric crystalline pyramid lattices with negative interior space
       return (length(z) - 1.4142) / max(scale, 1e-4);
     }
 
     // 8. 3D Burning Ship Bulb: Mandelbulb variant utilizing absolute-value coordinate components (|x|, |y|, |z|)
-    float deBurningShip(vec3 p, float power, float morph, out float trap) {
+    float deBurningShip(vec3 p, float power, float morph, out vec4 trap) {
       vec3 w = p;
       w.z += morph * 0.12;
       float dz = 1.0;
       float r = 0.0;
-      trap = 1e10;
+      trap = vec4(1e10);
 
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
@@ -993,7 +1030,10 @@
         w = abs(w);
 
         r = length(w);
-        trap = min(trap, abs(w.z) * 0.75 + length(w.xy) * 0.35);
+        trap.x = min(trap.x, abs(w.z) * 0.75 + length(w.xy) * 0.35);
+        trap.y = min(trap.y, abs(w.x - w.y));
+        trap.z = min(trap.z, r);
+        trap.w = min(trap.w, abs(w.x * w.y * w.z));
         if (r > 3.2) break;
 
         float theta = acos(clamp(w.z / max(r, 1e-6), -1.0, 1.0));
@@ -1011,10 +1051,10 @@
     }
 
     // 9. Kleinian Group / Inversion Spheres (Jos Leys formula): Iterated sphere inversion limit sets with box-folding
-    float deKleinian(vec3 p, float scaleFactor, float morph, out float trap) {
+    float deKleinian(vec3 p, float scaleFactor, float morph, out vec4 trap) {
       vec3 z = p;
       float scale = 1.0;
-      trap = 1e10;
+      trap = vec4(1e10);
 
       // Jos Leys formula with box-folding
       vec3 box = vec3(0.95, 0.95, 0.95);
@@ -1038,7 +1078,10 @@
         z += c;
 
         // Orbit trap for dense interlocking beaded rings & tubular cages
-        trap = min(trap, abs(length(z.xy) - 0.65) + abs(z.z) * 0.35);
+        trap.x = min(trap.x, abs(length(z.xy) - 0.65) + abs(z.z) * 0.35);
+        trap.y = min(trap.y, r2);
+        trap.z = min(trap.z, length(z.xz));
+        trap.w = min(trap.w, max(abs(z.x), max(abs(z.y), abs(z.z))));
       }
       // Dense hyperbolic interlocking beaded rings and tubular fractal cages
       float d = (length(z.xz) - 0.20) / max(scale, 1e-5);
@@ -1046,7 +1089,7 @@
     }
 
     // Master distance evaluator
-    float mapScene(vec3 p, out float trap) {
+    float mapScene(vec3 p, out vec4 trap) {
       if (u_equation == 0) {
         return deMandelbulb(p, u_scalePower, u_morph, trap);
       } else if (u_equation == 1) {
@@ -1073,7 +1116,7 @@
     vec3 calcNormal(vec3 p, float t) {
       float eps = max(t * u_hitEpsilon * 0.75, 0.00002);
       vec2 e = vec2(1.0, -1.0) * 0.57735027 * eps;
-      float tr;
+      vec4 tr;
       return normalize(
         e.xyy * mapScene(p + e.xyy, tr) +
         e.yyx * mapScene(p + e.yyx, tr) +
@@ -1087,7 +1130,7 @@
       if (u_aoTaps <= 0) return 1.0;
       float occ = 0.0;
       float sca = 1.0;
-      float tr;
+      vec4 tr;
       for (int i = 1; i <= 4; i++) {
         if (i > u_aoTaps) break;
         float h = float(i) * 0.038;
@@ -1102,7 +1145,7 @@
     float calcSoftShadow(vec3 ro, vec3 rd, float mint, float maxt, float k) {
       float res = 1.0;
       float t = mint;
-      float tr;
+      vec4 tr;
       for (int i = 0; i < 16; i++) {
         if (t >= maxt) break;
         float d = mapScene(ro + rd * t, tr);
@@ -1123,45 +1166,153 @@
       return sky + horizon * vec3(0.06, 0.09, 0.14) + sunGlow;
     }
 
-    // High-contrast clean palettes
-    vec3 getPaletteSurface(int pal, float trap, out vec3 specColor, out vec3 rimColor) {
-      vec3 col = vec3(0.0);
-      specColor = vec3(1.0);
-      rimColor = vec3(1.0);
+    // Inigo Quilez Continuous Cosine Gradient Mathematics:
+    // color(t) = a + b * cos(2*PI*(c*t + d))
+    vec3 cosinePalette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+      return clamp(a + b * cos(6.28318530718 * (c * t + d)), 0.0, 1.0);
+    }
 
-      float t = clamp(fract(trap * 0.8), 0.0, 1.0);
+    void getCosineCoeffs(int pal, out vec3 a, out vec3 b, out vec3 c, out vec3 d) {
+      if (pal == 0) {
+        // 0: Liquid Obsidian & 24K Gold
+        a = vec3(0.28, 0.22, 0.12);
+        b = vec3(0.52, 0.42, 0.18);
+        c = vec3(1.0, 1.0, 0.7);
+        d = vec3(0.00, 0.12, 0.24);
+      } else if (pal == 1) {
+        // 1: Cyber Neon Cyan
+        a = vec3(0.12, 0.38, 0.58);
+        b = vec3(0.25, 0.45, 0.48);
+        c = vec3(0.85, 1.0, 1.15);
+        d = vec3(0.60, 0.78, 0.95);
+      } else if (pal == 2) {
+        // 2: Pearlescent Opal & Porcelain
+        a = vec3(0.82, 0.84, 0.88);
+        b = vec3(0.18, 0.16, 0.22);
+        c = vec3(1.2, 1.0, 1.1);
+        d = vec3(0.00, 0.33, 0.67);
+      } else if (pal == 3) {
+        // 3: Crimson Magma
+        a = vec3(0.50, 0.18, 0.05);
+        b = vec3(0.50, 0.28, 0.12);
+        c = vec3(1.0, 1.0, 0.5);
+        d = vec3(0.00, 0.15, 0.20);
+      } else if (pal == 4) {
+        // 4: Cosmic Spectral Prism
+        a = vec3(0.50, 0.50, 0.50);
+        b = vec3(0.50, 0.50, 0.50);
+        c = vec3(1.0, 1.0, 1.0);
+        d = vec3(0.00, 0.33, 0.67);
+      } else {
+        // 5: Ethereal Polar Aurora
+        a = vec3(0.18, 0.45, 0.42);
+        b = vec3(0.38, 0.52, 0.45);
+        c = vec3(1.0, 0.90, 1.10);
+        d = vec3(0.22, 0.58, 0.85);
+      }
+    }
+
+    // Orbit Trap Chromodynamics: Surface Color, Iridescent Micro-Filaments, Specular Tint, & Cavity Glow
+    vec3 getPaletteSurface(int pal, vec4 trap, out vec3 specColor, out vec3 rimColor) {
+      vec3 a, b, c, d;
+      getCosineCoeffs(pal, a, b, c, d);
+
+      // Primary spectral parameter coordinate derived from radial and axial trap components
+      float tCoord = trap.x * 0.75 + trap.y * 0.45;
+      float t = fract(tCoord);
+
+      // Continuous cosine base color
+      vec3 baseCol = cosinePalette(t, a, b, c, d);
+
+      // Iridescent micro-filament shift from high-frequency harmonic trap components
+      float microFreq = trap.w * 2.8 + trap.z * 1.4;
+      vec3 iridescentCol = cosinePalette(t + microFreq * 0.22, a, b, c, d + vec3(0.18, -0.12, 0.25));
+      float filament = pow(clamp(1.0 - trap.w * 1.6, 0.0, 1.0), 2.5);
+
+      // Specular tinting: metallic crystals tint specular highlights
+      specColor = mix(vec3(1.0), baseCol * 1.35, clamp(trap.z * 0.75, 0.15, 0.85));
+
+      // Rim lighting: harmonic complement from spectral gradient
+      rimColor = cosinePalette(t + 0.38, a, b, c, d);
+
+      vec3 col = baseCol;
 
       if (pal == 0) {
-        // 1. Liquid Obsidian & Gold: Deep reflective onyx with pure 24K gold filaments
-        vec3 obsidian = mix(vec3(0.015, 0.020, 0.028), vec3(0.065, 0.070, 0.085), t);
-        vec3 gold = vec3(1.0, 0.80, 0.25);
-        float goldEdge = pow(1.0 - t, 2.4);
-        col = mix(obsidian, gold * 0.95, goldEdge * 0.7);
-        specColor = mix(vec3(1.0, 0.92, 0.65), gold, 0.75);
+        // Liquid Obsidian & Gold: deep obsidian substrate with 24K molten gold veins
+        vec3 obsidian = mix(vec3(0.012, 0.016, 0.022), vec3(0.055, 0.060, 0.075), t);
+        vec3 gold = vec3(1.0, 0.82, 0.24);
+        float goldVein = pow(clamp(1.0 - trap.x * 1.2, 0.0, 1.0), 2.2);
+        col = mix(obsidian, gold, clamp(goldVein * 0.85 + filament * 0.4, 0.0, 1.0));
+        specColor = mix(vec3(1.0, 0.94, 0.70), gold, 0.75);
         rimColor = gold;
       } else if (pal == 1) {
-        // 2. Deep Neon Cyan: Electric cyber-grid on midnight carbon
-        vec3 navy = mix(vec3(0.010, 0.020, 0.038), vec3(0.030, 0.060, 0.110), t);
+        // Cyber Neon Cyan: deep carbon substrate with electric cyan & ultraviolet iridescence
+        vec3 carbon = mix(vec3(0.012, 0.022, 0.038), vec3(0.035, 0.065, 0.115), t);
         vec3 cyan = vec3(0.0, 0.95, 1.0);
-        col = mix(cyan * 0.85, navy, smoothstep(0.03, 0.70, t));
-        specColor = mix(vec3(0.85, 0.98, 1.0), cyan, 0.6);
+        vec3 violet = vec3(0.65, 0.20, 1.0);
+        vec3 gridCol = mix(cyan, violet, sin(microFreq * 4.0) * 0.5 + 0.5);
+        float neonGlow = clamp(1.0 - trap.x * 1.3, 0.0, 1.0);
+        col = mix(carbon, gridCol, clamp(neonGlow * 0.90 + filament * 0.5, 0.0, 1.0));
+        specColor = mix(vec3(0.85, 0.98, 1.0), cyan, 0.65);
         rimColor = cyan;
       } else if (pal == 2) {
-        // 3. Pearlescent Porcelain: Sculptural museum marble with pearlescent sheen
-        vec3 porcelain = mix(vec3(0.80, 0.83, 0.88), vec3(0.96, 0.97, 0.99), t);
-        vec3 shimmer = mix(vec3(0.92, 0.84, 1.0), vec3(0.82, 0.95, 1.0), sin((trap + 0.1) * 6.28) * 0.5 + 0.5);
-        col = mix(porcelain, shimmer, 0.18);
+        // Pearlescent Opal & Porcelain: alabaster marble with delicate rainbow iridescence
+        vec3 porcelain = mix(vec3(0.82, 0.85, 0.90), vec3(0.97, 0.98, 1.0), t);
+        col = mix(porcelain, iridescentCol, 0.32);
         specColor = vec3(1.0, 1.0, 1.0);
-        rimColor = vec3(0.88, 0.94, 1.0);
+        rimColor = mix(vec3(0.85, 0.92, 1.0), iridescentCol, 0.5);
+      } else if (pal == 3) {
+        // Crimson Magma: cooled basalt with incandescent molten cracks
+        vec3 basalt = mix(vec3(0.022, 0.016, 0.018), vec3(0.085, 0.055, 0.055), t);
+        vec3 molten = mix(vec3(1.0, 0.12, 0.01), vec3(1.0, 0.72, 0.08), pow(clamp(1.0 - trap.x * 1.4, 0.0, 1.0), 2.0));
+        float magmaHeat = pow(clamp(1.0 - trap.x * 1.5, 0.0, 1.0), 1.8);
+        col = mix(basalt, molten, clamp(magmaHeat * 0.95 + filament * 0.45, 0.0, 1.0));
+        specColor = vec3(1.0, 0.82, 0.48);
+        rimColor = vec3(1.0, 0.32, 0.08);
+      } else if (pal == 4) {
+        // Cosmic Spectral Prism: vibrant continuous rainbow spectrum with iridescent filaments
+        col = mix(baseCol, iridescentCol, filament * 0.60);
+        specColor = mix(vec3(1.0), baseCol * 1.5, 0.70);
+        rimColor = cosinePalette(t + 0.45, a, b, c, d);
       } else {
-        // 4. Crimson Magma: Volcanic cooled basalt with molten glowing magma
-        vec3 basalt = mix(vec3(0.025, 0.018, 0.020), vec3(0.095, 0.065, 0.065), t);
-        vec3 magma = mix(vec3(1.0, 0.10, 0.01), vec3(1.0, 0.65, 0.05), pow(1.0 - t, 2.0));
-        col = mix(magma, basalt, smoothstep(0.02, 0.60, t));
-        specColor = vec3(1.0, 0.80, 0.45);
-        rimColor = vec3(1.0, 0.28, 0.06);
+        // Ethereal Polar Aurora: celestial emerald into deep teal and polar violet
+        col = mix(baseCol, iridescentCol, filament * 0.55);
+        specColor = mix(vec3(0.7, 1.0, 0.85), baseCol * 1.3, 0.60);
+        rimColor = vec3(0.20, 0.95, 0.75);
       }
+
+      // Local emission in deep crevices and inner chambers where orbit trap is tightly bound
+      float cavityEmission = exp(-trap.x * 3.2) * 0.35;
+      col += rimColor * cavityEmission;
+
       return col;
+    }
+
+    // Distance-proximity volumetric glow color tied to the active spectral palette
+    vec3 getPaletteGlow(int pal, vec4 trap) {
+      vec3 a, b, c, d;
+      getCosineCoeffs(pal, a, b, c, d);
+      float t = fract(trap.x * 0.55 + trap.y * 0.35);
+
+      if (pal == 0) {
+        // Warm golden amber aura
+        return mix(vec3(1.0, 0.78, 0.25), vec3(0.85, 0.52, 0.12), t);
+      } else if (pal == 1) {
+        // Electric cyan and deep ultraviolet aura
+        return mix(vec3(0.02, 0.88, 1.0), vec3(0.45, 0.15, 0.95), t);
+      } else if (pal == 2) {
+        // Ethereal opal / moonstone aura
+        return mix(vec3(0.65, 0.75, 0.95), vec3(0.85, 0.70, 0.92), t);
+      } else if (pal == 3) {
+        // Incandescent fiery magma aura
+        return mix(vec3(1.0, 0.32, 0.04), vec3(1.0, 0.70, 0.10), t);
+      } else if (pal == 4) {
+        // Radiant spectral rainbow aura
+        return cosinePalette(t, a, b, c, d);
+      } else {
+        // Polar emerald & turquoise aurora
+        return mix(vec3(0.12, 0.92, 0.65), vec3(0.18, 0.55, 0.95), t);
+      }
     }
 
     // Clean, minimalist background gradient
@@ -1200,9 +1351,10 @@
         float tMax = min(tExit, 24.0);
         float stepFudge = u_stepMultiplier;
         bool hit = false;
-        float hitTrap = 0.0;
-        float trap = 0.0;
+        vec4 hitTrap = vec4(0.0);
+        vec4 trap = vec4(0.0);
         float boundR2 = boundingRadius * boundingRadius;
+        vec3 volGlow = vec3(0.0);
 
         for (int i = 0; i < 144; i++) {
           if (i >= u_maxSteps || t > tMax) break;
@@ -1212,6 +1364,12 @@
           if (dot(pos, pos) > boundR2) break;
 
           float d = mapScene(pos, trap);
+
+          // Volumetric Glow: accumulate distance-proximity radiance along raymarch trajectory
+          float stepDist = max(d * stepFudge, 0.003);
+          float glowAtten = exp(-max(d - 0.02, 0.0) * 3.2);
+          float glowDensity = (1.0 / (1.0 + d * d * 42.0)) * glowAtten * stepDist;
+          volGlow += getPaletteGlow(u_palette, trap) * glowDensity;
 
           // Dynamic surface hit threshold (EPSILON): scales from 0.003 down to 0.0006 with deep-zoom retention
           float eps = max(t * u_hitEpsilon, 0.000004);
@@ -1224,7 +1382,7 @@
           t += d * stepFudge;
         }
 
-        col = getBackground(rd);
+        col = getBackground(rd) + volGlow * 0.22;
 
         if (hit) {
           vec3 pos = ro + rd * t;
@@ -1255,7 +1413,7 @@
           // Geometric specular anti-aliasing (prevents micro-sparkle aliasing)
           float specAtten = clamp(1.0 - t * 0.06, 0.2, 1.0);
 
-          // Surface palette color
+          // Surface palette color via Orbit Trap Chromodynamics
           vec3 specColor;
           vec3 rimColor;
           vec3 surface = getPaletteSurface(u_palette, hitTrap, specColor, rimColor);
@@ -1279,6 +1437,9 @@
           float backLight = pow(clamp(dot(-rd, keyDir), 0.0, 1.0), 3.0);
           float sss = backLight * (1.0 - rawAO) * 0.32 * u_metallicPolish;
           col += rimColor * sss;
+
+          // Volumetric cavity glow composite
+          col += volGlow * 0.18;
 
           // Subtle distance fog & depth fading to accentuate scale and 3D depth
           float objDepth = max(0.0, t - tEnter);
@@ -1323,7 +1484,7 @@
       // State
       const state = {
         equation: 0,            // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
-        palette: 0,             // 0: Obsidian & Gold, 1: Deep Cyan, 2: Porcelain, 3: Magma
+        palette: 0,             // 0: Obsidian, 1: Cyan, 2: Porcelain, 3: Magma, 4: Spectral, 5: Aurora
         fov: 54.0,
         fidelityMode: 'auto',   // 'auto' (Auto 60FPS), 'ultra' (Retina 2.0x), 'perf' (Fast)
         resolutionScale: 1.0,   // Definition Slider: 0.5x (retro) to 2.0x (retina supersampling)

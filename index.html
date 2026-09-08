@@ -190,12 +190,13 @@
     .dock-select-wrap {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex: 1;
+      min-width: 0;
       background: rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
-      padding: 3px 8px;
+      padding: 3px 6px;
     }
 
     .dock-label {
@@ -211,6 +212,7 @@
 
     .hud-dropdown {
       flex: 1;
+      min-width: 0;
       background: transparent;
       border: none;
       color: var(--text);
@@ -219,12 +221,15 @@
       font-weight: 600;
       cursor: pointer;
       outline: none;
-      padding: 5px 22px 5px 4px;
+      padding: 5px 20px 5px 4px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
       -webkit-appearance: none;
       appearance: none;
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
       background-repeat: no-repeat;
-      background-position: right 6px center;
+      background-position: right 5px center;
       background-size: 12px;
     }
     .hud-dropdown option {
@@ -237,7 +242,7 @@
     /* Palette chips row */
     .palette-row {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 4px;
       width: 100%;
       align-items: center;
@@ -530,7 +535,7 @@
         display: none;
       }
       .palette-row {
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(5, 1fr);
       }
       .tuning-grid {
         grid-template-columns: 1fr;
@@ -598,7 +603,7 @@
   <!-- Floating Mobile-Optimized HUD Island -->
   <footer id="bottom-dock">
     <div class="dock-island">
-      <!-- Top Row: Equation Selector Dropdown & Tuning Toggle -->
+      <!-- Top Row: Equation Selector Dropdown, Palette Selector & Tuning Toggle -->
       <div class="dock-row">
         <div class="dock-select-wrap">
           <label for="eq-select" class="dock-label">FRACTAL</label>
@@ -614,7 +619,17 @@
             <option value="8">9. Kleinian Inversion Spheres</option>
           </select>
         </div>
-        <button id="btn-toggle-tuning" class="tuning-toggle-btn active" title="Toggle 5 Math & Visual Sliders">
+        <div class="dock-select-wrap">
+          <label for="palette-select" class="dock-label">PALETTE</label>
+          <select id="palette-select" class="hud-dropdown">
+            <option value="0">1. Deep Obsidian & Gold</option>
+            <option value="1">2. Electric Neon / Cyber</option>
+            <option value="2">3. Thermal Radiance (Fire)</option>
+            <option value="3">4. Opaline / Spectral</option>
+            <option value="4">5. Monochromatic Alabaster</option>
+          </select>
+        </div>
+        <button id="btn-toggle-tuning" class="tuning-toggle-btn active" title="Toggle 6 Math & Visual Sliders">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="21" x2="4" y2="14"></line>
             <line x1="4" y1="10" x2="4" y2="3"></line>
@@ -632,29 +647,25 @@
 
       <!-- Middle Row: Color Palettes -->
       <div class="palette-row">
-        <button class="palette-chip active" data-palette="0" title="Liquid Obsidian & Gold">
+        <button class="palette-chip active" data-palette="0" title="Deep Obsidian & Gold (Dark Basalt with Gold Veins)">
           <span class="color-swatch swatch-gold"></span>
           <span>Obsidian</span>
         </button>
-        <button class="palette-chip" data-palette="1" title="Cyber Neon Cyan">
+        <button class="palette-chip" data-palette="1" title="Electric Neon / Cyber (Cyan/Magenta/Deep Blue)">
           <span class="color-swatch swatch-cyan"></span>
-          <span>Cyan</span>
+          <span>Cyber</span>
         </button>
-        <button class="palette-chip" data-palette="2" title="Pearlescent Opal">
-          <span class="color-swatch swatch-porcelain"></span>
-          <span>Porcelain</span>
-        </button>
-        <button class="palette-chip" data-palette="3" title="Crimson Magma">
+        <button class="palette-chip" data-palette="2" title="Thermal Radiance (Fire/Embers)">
           <span class="color-swatch swatch-magma"></span>
-          <span>Magma</span>
+          <span>Thermal</span>
         </button>
-        <button class="palette-chip" data-palette="4" title="Cosmic Spectral Prism">
+        <button class="palette-chip" data-palette="3" title="Opaline / Spectral (Iridescent Mother-of-Pearl)">
           <span class="color-swatch swatch-spectral"></span>
-          <span>Spectral</span>
+          <span>Opaline</span>
         </button>
-        <button class="palette-chip" data-palette="5" title="Ethereal Polar Aurora">
-          <span class="color-swatch swatch-aurora"></span>
-          <span>Aurora</span>
+        <button class="palette-chip" data-palette="4" title="Monochromatic Alabaster (Chalky Stone with Crevices)">
+          <span class="color-swatch swatch-porcelain"></span>
+          <span>Alabaster</span>
         </button>
       </div>
 
@@ -716,12 +727,21 @@
           </div>
 
           <!-- Slider 5: Crevice Shadow / AO -->
-          <div class="slider-card full-width">
+          <div class="slider-card">
             <div class="slider-header">
-              <span class="slider-name">5. CREVICE SHADOW / AO</span>
+              <span class="slider-name">5. CREVICE AO</span>
               <span id="val-shadow" class="slider-num">1.8x</span>
             </div>
             <input type="range" id="slider-shadow" min="0.5" max="3.5" step="0.1" value="1.8">
+          </div>
+
+          <!-- Slider 6: Volumetric Atmospheric Glow -->
+          <div class="slider-card">
+            <div class="slider-header">
+              <span class="slider-name">6. VOLUMETRIC GLOW</span>
+              <span id="val-glow" class="slider-num">1.00x</span>
+            </div>
+            <input type="range" id="slider-glow" min="0.0" max="2.5" step="0.05" value="1.0">
           </div>
         </div>
 
@@ -760,7 +780,7 @@
     uniform float     u_fov;
     uniform float     u_time;
     uniform int       u_equation;       // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
-    uniform int       u_palette;        // 0: Obsidian & Gold, 1: Cyan, 2: Porcelain, 3: Magma, 4: Spectral, 5: Aurora
+    uniform int       u_palette;        // 0: Obsidian & Gold, 1: Electric Cyber, 2: Thermal Radiance, 3: Opaline Spectral, 4: Alabaster
     uniform int       u_maxSteps;       // Dynamic raymarching step budget
     uniform int       u_maxIter;        // Dynamic fractal iteration budget (3 to 14)
     uniform int       u_aoTaps;         // Dynamic AO tap count (1 to 3)
@@ -771,6 +791,7 @@
     uniform float     u_scalePower;     // Slider 2: Scale / Power
     uniform float     u_metallicPolish; // Slider 4: Surface Polish / Metallic (0.1 to 3.0)
     uniform float     u_aoContrast;     // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
+    uniform float     u_glowIntensity;  // Slider 6: Volumetric Atmospheric Glow (0.0 to 2.5)
     uniform sampler2D u_prevTex;        // Previous frame texture for Progressive TAA Accumulation
     uniform int       u_sampleIndex;    // Accumulation sample index (0 = fresh frame)
     uniform vec2      u_jitter;         // Subpixel jitter offset in pixel coordinates
@@ -819,10 +840,12 @@
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
         r = length(w);
-        trap.x = min(trap.x, abs(w.z) * 0.85 + length(w.xy) * 0.35);
-        trap.y = min(trap.y, abs(w.x * w.y));
-        trap.z = min(trap.z, r);
-        trap.w = min(trap.w, length(cross(w, vec3(0.0, 0.0, 1.0))));
+
+        // Multi-geometry orbit trap tracking: sphere, axis/cross, planar, iteration depth
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap: min(length(z) - r, trapSphere)
+        trap.y = min(trap.y, min(abs(w.x), min(abs(w.y), abs(w.z))));    // Axis/cross trap: min(min(abs(z.x), min(abs(z.y), abs(z.z))), trapAxis)
+        trap.z = min(trap.z, abs(w.y));                                   // Planar trap: min(abs(z.y), trapPlane)
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
         if (r > 3.0) break;
 
         float theta = acos(clamp(w.z / max(r, 1e-6), -1.0, 1.0));
@@ -869,10 +892,12 @@
         z = scale * z + offset;
         dz = dz * abs(scale) + 1.0;
 
-        trap.x = min(trap.x, length(z.xz));
-        trap.y = min(trap.y, abs(z.y));
-        trap.z = min(trap.z, r2);
-        trap.w = min(trap.w, max(abs(z.x), max(abs(z.y), abs(z.z))));
+        // Multi-geometry orbit trap tracking
+        float r = sqrt(r2);
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap
+        trap.y = min(trap.y, min(abs(z.x), min(abs(z.y), abs(z.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(z.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
       }
       return (length(z) - 0.05) / max(abs(dz), 1e-5);
     }
@@ -890,16 +915,18 @@
         r2 = dot(z, z);
         if (r2 > 4.5) break;
 
+        // Multi-geometry orbit trap tracking
+        float r = sqrt(r2);
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap
+        trap.y = min(trap.y, min(abs(z.x), min(abs(z.y), abs(z.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(z.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
+
         dz2 *= 4.0 * r2;
         z = vec4(
           z.x * z.x - dot(z.yzw, z.yzw),
           2.0 * z.x * z.yzw
         ) + c;
-
-        trap.x = min(trap.x, abs(z.x * z.y) * 1.2 + length(z.zw) * 0.6);
-        trap.y = min(trap.y, abs(z.w));
-        trap.z = min(trap.z, r2);
-        trap.w = min(trap.w, abs(z.x - z.z) + abs(z.y - z.w));
       }
       return 0.35 * sqrt(r2 / max(dz2, 1e-6)) * log(max(r2, 1.0001));
     }
@@ -915,10 +942,14 @@
         if (i >= u_maxIter) break;
         z = -1.0 + 2.0 * fract(0.5 * z + 0.5);
         float r2 = dot(z, z);
-        trap.x = min(trap.x, r2);
-        trap.y = min(trap.y, abs(z.x - z.y));
-        trap.z = min(trap.z, length(z.yz));
-        trap.w = min(trap.w, abs(z.z));
+        float r = sqrt(r2);
+
+        // Multi-geometry orbit trap tracking
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap
+        trap.y = min(trap.y, min(abs(z.x), min(abs(z.y), abs(z.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(z.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
+
         float k = max(kParam / max(r2, 0.001), 0.15);
         z *= k;
         scale *= k;
@@ -946,10 +977,13 @@
         float dc = max(r.z, r.x);
         float c = (min(da, min(db, dc)) - (1.0 + morph * 0.15)) / s;
         d = max(d, c);
-        trap.x = min(trap.x, length(r.xy) * 0.5 + abs(r.z) * 0.5);
-        trap.y = min(trap.y, min(abs(r.x), min(abs(r.y), abs(r.z))));
-        trap.z = min(trap.z, max(r.x, max(r.y, r.z)));
-        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));
+
+        // Multi-geometry orbit trap tracking on recursive iterate
+        float lenR = length(r);
+        trap.x = min(trap.x, abs(lenR - 0.75));                           // Sphere trap
+        trap.y = min(trap.y, min(abs(r.x), min(abs(r.y), abs(r.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(r.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
       }
       return d;
     }
@@ -959,7 +993,6 @@
       vec3 z = p;
       float dz = 1.0;
       trap = vec4(1e10);
-      // Slider 1 & 2 wired to translation offset vector and fold scale
       vec3 offset = vec3(0.55 + morph * 0.22, 0.68 + morph * 0.12, 0.82);
       float sc = foldScale;
 
@@ -972,16 +1005,18 @@
         // Sphere inversion
         float r2 = dot(z, z);
         if (r2 < 0.0001) break;
+        float r = sqrt(r2);
+
+        // Multi-geometry orbit trap tracking
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap
+        trap.y = min(trap.y, min(abs(z.x), min(abs(z.y), abs(z.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(z.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
+
         float inv = sc / max(r2, 0.035);
         z = z * inv - offset;
         dz = dz * inv;
-
-        trap.x = min(trap.x, length(z.xz) * 0.6 + abs(z.y) * 0.4);
-        trap.y = min(trap.y, r2);
-        trap.z = min(trap.z, abs(z.x - z.z));
-        trap.w = min(trap.w, abs(z.x * z.y));
       }
-      // Dense alien architecture, biological lattices, and gothic spires
       float d = 0.5 * (length(z) - 0.35) / max(dz, 1e-4);
       return max(d, length(p) - 2.9);
     }
@@ -1006,12 +1041,13 @@
         z = z * sc - offset * (sc - 1.0);
         scale *= sc;
 
-        trap.x = min(trap.x, length(z - offset));
-        trap.y = min(trap.y, abs(z.x + z.y));
-        trap.z = min(trap.z, abs(z.y + z.z));
-        trap.w = min(trap.w, dot(z, z) / (scale * scale + 1.0));
+        // Multi-geometry orbit trap tracking
+        float r = length(z - offset);
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap
+        trap.y = min(trap.y, min(abs(z.x), min(abs(z.y), abs(z.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(z.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
       }
-      // Clean, geometric crystalline pyramid lattices with negative interior space
       return (length(z) - 1.4142) / max(scale, 1e-4);
     }
 
@@ -1026,14 +1062,14 @@
       for (int i = 0; i < 14; i++) {
         if (i >= u_maxIter) break;
 
-        // Absolute-value coordinate components (|x|, |y|, |z|) prior to spherical power transformations
         w = abs(w);
-
         r = length(w);
-        trap.x = min(trap.x, abs(w.z) * 0.75 + length(w.xy) * 0.35);
-        trap.y = min(trap.y, abs(w.x - w.y));
-        trap.z = min(trap.z, r);
-        trap.w = min(trap.w, abs(w.x * w.y * w.z));
+
+        // Multi-geometry orbit trap tracking
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap
+        trap.y = min(trap.y, min(abs(w.x), min(abs(w.y), abs(w.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(w.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
         if (r > 3.2) break;
 
         float theta = acos(clamp(w.z / max(r, 1e-6), -1.0, 1.0));
@@ -1044,7 +1080,6 @@
         theta *= power;
         phi *= power;
 
-        // Sharp needle-like masts, razor crests, and jagged organic ridges
         w = rPow * vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)) + p;
       }
       return 0.5 * log(max(r, 1.0001)) * r / max(dz, 1e-6);
@@ -1077,13 +1112,13 @@
         // Translation offset
         z += c;
 
-        // Orbit trap for dense interlocking beaded rings & tubular cages
-        trap.x = min(trap.x, abs(length(z.xy) - 0.65) + abs(z.z) * 0.35);
-        trap.y = min(trap.y, r2);
-        trap.z = min(trap.z, length(z.xz));
-        trap.w = min(trap.w, max(abs(z.x), max(abs(z.y), abs(z.z))));
+        // Multi-geometry orbit trap tracking
+        float r = sqrt(r2);
+        trap.x = min(trap.x, abs(r - 0.75));                              // Sphere trap
+        trap.y = min(trap.y, min(abs(z.x), min(abs(z.y), abs(z.z))));    // Axis/cross trap
+        trap.z = min(trap.z, abs(z.y));                                   // Planar trap
+        trap.w = min(trap.w, float(i) / float(max(u_maxIter, 1)));        // Iteration depth
       }
-      // Dense hyperbolic interlocking beaded rings and tubular fractal cages
       float d = (length(z.xz) - 0.20) / max(scale, 1e-5);
       return max(d, length(p) - 3.4);
     }
@@ -1166,152 +1201,147 @@
       return sky + horizon * vec3(0.06, 0.09, 0.14) + sunGlow;
     }
 
-    // Inigo Quilez Continuous Cosine Gradient Mathematics:
-    // color(t) = a + b * cos(2*PI*(c*t + d))
-    vec3 cosinePalette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
-      return clamp(a + b * cos(6.28318530718 * (c * t + d)), 0.0, 1.0);
+    // Inigo Quilez Parameterized Cosine Gradient:
+    // palette(t, a, b, c, d) = a + b * cos(6.2831853 * (c * t + d))
+    vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+      return a + b * cos(6.2831853 * (c * t + d));
     }
 
     void getCosineCoeffs(int pal, out vec3 a, out vec3 b, out vec3 c, out vec3 d) {
       if (pal == 0) {
-        // 0: Liquid Obsidian & 24K Gold
+        // Deep Obsidian & Gold (dark basalt with metallic gold veins)
         a = vec3(0.28, 0.22, 0.12);
-        b = vec3(0.52, 0.42, 0.18);
+        b = vec3(0.55, 0.42, 0.15);
         c = vec3(1.0, 1.0, 0.7);
         d = vec3(0.00, 0.12, 0.24);
       } else if (pal == 1) {
-        // 1: Cyber Neon Cyan
-        a = vec3(0.12, 0.38, 0.58);
-        b = vec3(0.25, 0.45, 0.48);
-        c = vec3(0.85, 1.0, 1.15);
-        d = vec3(0.60, 0.78, 0.95);
+        // Electric Neon / Cyber (cyan/magenta/deep blue)
+        a = vec3(0.35, 0.20, 0.55);
+        b = vec3(0.35, 0.45, 0.45);
+        c = vec3(1.0, 1.2, 0.9);
+        d = vec3(0.55, 0.85, 0.20);
       } else if (pal == 2) {
-        // 2: Pearlescent Opal & Porcelain
-        a = vec3(0.82, 0.84, 0.88);
-        b = vec3(0.18, 0.16, 0.22);
-        c = vec3(1.2, 1.0, 1.1);
-        d = vec3(0.00, 0.33, 0.67);
-      } else if (pal == 3) {
-        // 3: Crimson Magma
-        a = vec3(0.50, 0.18, 0.05);
-        b = vec3(0.50, 0.28, 0.12);
+        // Thermal Radiance (fire/embers)
+        a = vec3(0.50, 0.22, 0.06);
+        b = vec3(0.50, 0.30, 0.10);
         c = vec3(1.0, 1.0, 0.5);
         d = vec3(0.00, 0.15, 0.20);
-      } else if (pal == 4) {
-        // 4: Cosmic Spectral Prism
-        a = vec3(0.50, 0.50, 0.50);
-        b = vec3(0.50, 0.50, 0.50);
+      } else if (pal == 3) {
+        // Opaline / Spectral (iridescent mother-of-pearl)
+        a = vec3(0.72, 0.75, 0.82);
+        b = vec3(0.28, 0.25, 0.20);
         c = vec3(1.0, 1.0, 1.0);
         d = vec3(0.00, 0.33, 0.67);
       } else {
-        // 5: Ethereal Polar Aurora
-        a = vec3(0.18, 0.45, 0.42);
-        b = vec3(0.38, 0.52, 0.45);
-        c = vec3(1.0, 0.90, 1.10);
-        d = vec3(0.22, 0.58, 0.85);
+        // Monochromatic Alabaster (chalky sculptural stone with dark crevices)
+        a = vec3(0.75, 0.75, 0.76);
+        b = vec3(0.25, 0.25, 0.24);
+        c = vec3(1.0, 1.0, 1.0);
+        d = vec3(0.00, 0.00, 0.00);
       }
     }
 
-    // Orbit Trap Chromodynamics: Surface Color, Iridescent Micro-Filaments, Specular Tint, & Cavity Glow
-    vec3 getPaletteSurface(int pal, vec4 trap, out vec3 specColor, out vec3 rimColor) {
+    // Multi-Geometry Orbit Trap Surface Coloring
+    vec3 getPaletteSurface(int pal, vec4 trap, vec3 nor, out vec3 specColor, out vec3 rimColor) {
       vec3 a, b, c, d;
       getCosineCoeffs(pal, a, b, c, d);
 
-      // Primary spectral parameter coordinate derived from radial and axial trap components
-      float tCoord = trap.x * 0.75 + trap.y * 0.45;
-      float t = fract(tCoord);
+      // Normalized geometric trap scalars
+      float sphereTrap = clamp(trap.x * 1.25, 0.0, 1.0);
+      float axisTrap   = clamp(trap.y * 2.8, 0.0, 1.0);
+      float planeTrap  = clamp(trap.z * 1.8, 0.0, 1.0);
+      float iterDepth  = clamp(trap.w, 0.0, 1.0);
 
-      // Continuous cosine base color
-      vec3 baseCol = cosinePalette(t, a, b, c, d);
+      // Surface normal direction projection
+      float normProj = clamp(dot(nor, vec3(0.57735, 0.57735, 0.57735)) * 0.5 + 0.5, 0.0, 1.0);
 
-      // Iridescent micro-filament shift from high-frequency harmonic trap components
-      float microFreq = trap.w * 2.8 + trap.z * 1.4;
-      vec3 iridescentCol = cosinePalette(t + microFreq * 0.22, a, b, c, d + vec3(0.18, -0.12, 0.25));
-      float filament = pow(clamp(1.0 - trap.w * 1.6, 0.0, 1.0), 2.5);
+      // Parameter 't' driven by mix of orbit trap values, iteration depth, and surface normal direction
+      float t = fract(sphereTrap * 0.32 + axisTrap * 0.38 + planeTrap * 0.18 + iterDepth * 0.45 + normProj * 0.22);
 
-      // Specular tinting: metallic crystals tint specular highlights
-      specColor = mix(vec3(1.0), baseCol * 1.35, clamp(trap.z * 0.75, 0.15, 0.85));
+      // Parameterized Inigo Quilez cosine gradient
+      vec3 baseCol = clamp(palette(t, a, b, c, d), 0.0, 1.0);
 
-      // Rim lighting: harmonic complement from spectral gradient
-      rimColor = cosinePalette(t + 0.38, a, b, c, d);
+      // Cross-sectional phase shift across axis and planar traps
+      float crossPhase = axisTrap * 2.2 + planeTrap * 1.4;
+      vec3 iridCol = clamp(palette(t + crossPhase * 0.20, a, b, c, d + vec3(0.18, -0.12, 0.24)), 0.0, 1.0);
+
+      // Specular color tinting: metallic crystals tint specular reflections
+      specColor = mix(vec3(1.0), baseCol * 1.4, clamp(axisTrap * 0.8 + iterDepth * 0.2, 0.15, 0.90));
+
+      // Rim lighting: harmonic complement
+      rimColor = clamp(palette(t + 0.35, a, b, c, d), 0.0, 1.0);
 
       vec3 col = baseCol;
 
       if (pal == 0) {
-        // Liquid Obsidian & Gold: deep obsidian substrate with 24K molten gold veins
-        vec3 obsidian = mix(vec3(0.012, 0.016, 0.022), vec3(0.055, 0.060, 0.075), t);
-        vec3 gold = vec3(1.0, 0.82, 0.24);
-        float goldVein = pow(clamp(1.0 - trap.x * 1.2, 0.0, 1.0), 2.2);
-        col = mix(obsidian, gold, clamp(goldVein * 0.85 + filament * 0.4, 0.0, 1.0));
-        specColor = mix(vec3(1.0, 0.94, 0.70), gold, 0.75);
+        // Deep Obsidian & Gold: dark basalt with metallic gold veins along axis trap
+        vec3 basalt = mix(vec3(0.015, 0.018, 0.024), vec3(0.060, 0.065, 0.075), t);
+        vec3 gold = vec3(1.0, 0.82, 0.22);
+        float goldVein = pow(1.0 - axisTrap, 3.2);
+        col = mix(basalt, gold, clamp(goldVein * 0.88 + (1.0 - sphereTrap) * 0.35, 0.0, 1.0));
+        specColor = mix(vec3(1.0, 0.92, 0.65), gold, 0.80);
         rimColor = gold;
       } else if (pal == 1) {
-        // Cyber Neon Cyan: deep carbon substrate with electric cyan & ultraviolet iridescence
-        vec3 carbon = mix(vec3(0.012, 0.022, 0.038), vec3(0.035, 0.065, 0.115), t);
+        // Electric Neon / Cyber: cyan / magenta / deep blue with luminous neon grid
+        vec3 deepBlue = mix(vec3(0.010, 0.020, 0.045), vec3(0.035, 0.055, 0.125), t);
         vec3 cyan = vec3(0.0, 0.95, 1.0);
-        vec3 violet = vec3(0.65, 0.20, 1.0);
-        vec3 gridCol = mix(cyan, violet, sin(microFreq * 4.0) * 0.5 + 0.5);
-        float neonGlow = clamp(1.0 - trap.x * 1.3, 0.0, 1.0);
-        col = mix(carbon, gridCol, clamp(neonGlow * 0.90 + filament * 0.5, 0.0, 1.0));
-        specColor = mix(vec3(0.85, 0.98, 1.0), cyan, 0.65);
+        vec3 magenta = vec3(1.0, 0.12, 0.75);
+        vec3 neon = mix(cyan, magenta, sin(crossPhase * 3.14159) * 0.5 + 0.5);
+        float grid = pow(1.0 - axisTrap, 2.8);
+        col = mix(deepBlue, neon, clamp(grid * 0.90 + (1.0 - sphereTrap) * 0.40, 0.0, 1.0));
+        specColor = mix(vec3(0.85, 0.98, 1.0), cyan, 0.70);
         rimColor = cyan;
       } else if (pal == 2) {
-        // Pearlescent Opal & Porcelain: alabaster marble with delicate rainbow iridescence
-        vec3 porcelain = mix(vec3(0.82, 0.85, 0.90), vec3(0.97, 0.98, 1.0), t);
-        col = mix(porcelain, iridescentCol, 0.32);
-        specColor = vec3(1.0, 1.0, 1.0);
-        rimColor = mix(vec3(0.85, 0.92, 1.0), iridescentCol, 0.5);
+        // Thermal Radiance: fire/embers with incandescent molten crack fissures
+        vec3 ember = mix(vec3(0.030, 0.015, 0.012), vec3(0.120, 0.040, 0.020), t);
+        vec3 fire = mix(vec3(1.0, 0.12, 0.01), vec3(1.0, 0.80, 0.15), pow(1.0 - sphereTrap, 2.0));
+        float heat = pow(1.0 - axisTrap, 2.2);
+        col = mix(ember, fire, clamp(heat * 0.95 + (1.0 - planeTrap) * 0.40, 0.0, 1.0));
+        specColor = vec3(1.0, 0.82, 0.45);
+        rimColor = vec3(1.0, 0.38, 0.05);
       } else if (pal == 3) {
-        // Crimson Magma: cooled basalt with incandescent molten cracks
-        vec3 basalt = mix(vec3(0.022, 0.016, 0.018), vec3(0.085, 0.055, 0.055), t);
-        vec3 molten = mix(vec3(1.0, 0.12, 0.01), vec3(1.0, 0.72, 0.08), pow(clamp(1.0 - trap.x * 1.4, 0.0, 1.0), 2.0));
-        float magmaHeat = pow(clamp(1.0 - trap.x * 1.5, 0.0, 1.0), 1.8);
-        col = mix(basalt, molten, clamp(magmaHeat * 0.95 + filament * 0.45, 0.0, 1.0));
-        specColor = vec3(1.0, 0.82, 0.48);
-        rimColor = vec3(1.0, 0.32, 0.08);
-      } else if (pal == 4) {
-        // Cosmic Spectral Prism: vibrant continuous rainbow spectrum with iridescent filaments
-        col = mix(baseCol, iridescentCol, filament * 0.60);
-        specColor = mix(vec3(1.0), baseCol * 1.5, 0.70);
-        rimColor = cosinePalette(t + 0.45, a, b, c, d);
+        // Opaline / Spectral: iridescent mother-of-pearl with delicate rainbow shimmer
+        vec3 pearlescent = mix(vec3(0.80, 0.83, 0.88), vec3(0.96, 0.97, 1.0), t);
+        col = mix(pearlescent, iridCol, 0.35);
+        specColor = vec3(1.0, 1.0, 1.0);
+        rimColor = mix(vec3(0.85, 0.92, 1.0), iridCol, 0.55);
       } else {
-        // Ethereal Polar Aurora: celestial emerald into deep teal and polar violet
-        col = mix(baseCol, iridescentCol, filament * 0.55);
-        specColor = mix(vec3(0.7, 1.0, 0.85), baseCol * 1.3, 0.60);
-        rimColor = vec3(0.20, 0.95, 0.75);
+        // Monochromatic Alabaster: chalky sculptural stone with dark crevices
+        vec3 stone = mix(vec3(0.65, 0.66, 0.68), vec3(0.95, 0.96, 0.97), t);
+        float creviceShade = axisTrap * 0.5 + sphereTrap * 0.5;
+        col = mix(vec3(0.12, 0.13, 0.15), stone, creviceShade);
+        specColor = vec3(0.90, 0.90, 0.90);
+        rimColor = vec3(0.75, 0.78, 0.82);
       }
 
-      // Local emission in deep crevices and inner chambers where orbit trap is tightly bound
-      float cavityEmission = exp(-trap.x * 3.2) * 0.35;
-      col += rimColor * cavityEmission;
+      // Micro-cavity local emission along sphere and axis traps
+      float cavity = exp(-sphereTrap * 4.0) * (1.0 - axisTrap) * 0.35;
+      col += rimColor * cavity;
 
       return col;
     }
 
-    // Distance-proximity volumetric glow color tied to the active spectral palette
+    // Distance-proximity volumetric atmospheric glow color tied to active spectral palette
     vec3 getPaletteGlow(int pal, vec4 trap) {
       vec3 a, b, c, d;
       getCosineCoeffs(pal, a, b, c, d);
-      float t = fract(trap.x * 0.55 + trap.y * 0.35);
+      float t = fract(trap.x * 0.45 + trap.y * 0.55);
 
       if (pal == 0) {
-        // Warm golden amber aura
-        return mix(vec3(1.0, 0.78, 0.25), vec3(0.85, 0.52, 0.12), t);
+        // Deep Obsidian & Gold: warm golden amber radiance
+        return mix(vec3(1.0, 0.78, 0.22), vec3(0.85, 0.50, 0.10), t);
       } else if (pal == 1) {
-        // Electric cyan and deep ultraviolet aura
-        return mix(vec3(0.02, 0.88, 1.0), vec3(0.45, 0.15, 0.95), t);
+        // Electric Neon / Cyber: electric cyan and magenta ultraviolet aura
+        return mix(vec3(0.02, 0.90, 1.0), vec3(0.95, 0.15, 0.80), t);
       } else if (pal == 2) {
-        // Ethereal opal / moonstone aura
-        return mix(vec3(0.65, 0.75, 0.95), vec3(0.85, 0.70, 0.92), t);
+        // Thermal Radiance: incandescent fiery crimson and molten orange glow
+        return mix(vec3(1.0, 0.32, 0.04), vec3(1.0, 0.75, 0.12), t);
       } else if (pal == 3) {
-        // Incandescent fiery magma aura
-        return mix(vec3(1.0, 0.32, 0.04), vec3(1.0, 0.70, 0.10), t);
-      } else if (pal == 4) {
-        // Radiant spectral rainbow aura
-        return cosinePalette(t, a, b, c, d);
+        // Opaline / Spectral: soft iridescent rainbow moonstone aura
+        return clamp(palette(t, a, b, c, d), 0.0, 1.0);
       } else {
-        // Polar emerald & turquoise aurora
-        return mix(vec3(0.12, 0.92, 0.65), vec3(0.18, 0.55, 0.95), t);
+        // Monochromatic Alabaster: subtle chalky stone mist
+        return mix(vec3(0.55, 0.58, 0.65), vec3(0.85, 0.88, 0.92), t);
       }
     }
 
@@ -1354,7 +1384,8 @@
         vec4 hitTrap = vec4(0.0);
         vec4 trap = vec4(0.0);
         float boundR2 = boundingRadius * boundingRadius;
-        vec3 volGlow = vec3(0.0);
+        vec3 accumGlow = vec3(0.0);
+        float glowFalloff = 14.0;
 
         for (int i = 0; i < 144; i++) {
           if (i >= u_maxSteps || t > tMax) break;
@@ -1365,11 +1396,10 @@
 
           float d = mapScene(pos, trap);
 
-          // Volumetric Glow: accumulate distance-proximity radiance along raymarch trajectory
-          float stepDist = max(d * stepFudge, 0.003);
-          float glowAtten = exp(-max(d - 0.02, 0.0) * 3.2);
-          float glowDensity = (1.0 / (1.0 + d * d * 42.0)) * glowAtten * stepDist;
-          volGlow += getPaletteGlow(u_palette, trap) * glowDensity;
+          // Volumetric Atmospheric Glow: accumGlow += exp(-glowFalloff * d) * stepSize
+          float stepSize = max(d * stepFudge, 0.002);
+          vec3 glowCol = getPaletteGlow(u_palette, trap);
+          accumGlow += glowCol * (exp(-glowFalloff * d) * stepSize);
 
           // Dynamic surface hit threshold (EPSILON): scales from 0.003 down to 0.0006 with deep-zoom retention
           float eps = max(t * u_hitEpsilon, 0.000004);
@@ -1382,7 +1412,8 @@
           t += d * stepFudge;
         }
 
-        col = getBackground(rd) + volGlow * 0.22;
+        vec3 volGlow = accumGlow * u_glowIntensity;
+        col = getBackground(rd) + volGlow * 0.45;
 
         if (hit) {
           vec3 pos = ro + rd * t;
@@ -1413,10 +1444,10 @@
           // Geometric specular anti-aliasing (prevents micro-sparkle aliasing)
           float specAtten = clamp(1.0 - t * 0.06, 0.2, 1.0);
 
-          // Surface palette color via Orbit Trap Chromodynamics
+          // Surface palette color via Multi-Geometry Orbit Trap Chromodynamics
           vec3 specColor;
           vec3 rimColor;
-          vec3 surface = getPaletteSurface(u_palette, hitTrap, specColor, rimColor);
+          vec3 surface = getPaletteSurface(u_palette, hitTrap, nor, specColor, rimColor);
 
           // Direct lighting composition with soft shadow and deep crevice sky attenuation
           vec3 keyLight = keyDiff * shadow * vec3(1.55, 1.46, 1.36);
@@ -1438,8 +1469,8 @@
           float sss = backLight * (1.0 - rawAO) * 0.32 * u_metallicPolish;
           col += rimColor * sss;
 
-          // Volumetric cavity glow composite
-          col += volGlow * 0.18;
+          // Volumetric atmospheric cavity glow
+          col += volGlow * 0.32;
 
           // Subtle distance fog & depth fading to accentuate scale and 3D depth
           float objDepth = max(0.0, t - tEnter);
@@ -1483,8 +1514,8 @@
 
       // State
       const state = {
-        equation: 0,            // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger
-        palette: 0,             // 0: Obsidian, 1: Cyan, 2: Porcelain, 3: Magma, 4: Spectral, 5: Aurora
+        equation: 0,            // 0: Mandelbulb, 1: Mandelbox, 2: Julia 4D, 3: Apollonian, 4: Menger, 5: Kali, 6: Tetrahedron, 7: Burning Ship, 8: Kleinian
+        palette: 0,             // 0: Obsidian, 1: Cyber, 2: Thermal, 3: Opaline, 4: Alabaster
         fov: 54.0,
         fidelityMode: 'auto',   // 'auto' (Auto 60FPS), 'ultra' (Retina 2.0x), 'perf' (Fast)
         resolutionScale: 1.0,   // Definition Slider: 0.5x (retro) to 2.0x (retina supersampling)
@@ -1497,12 +1528,13 @@
         targetPitch: 0.35,
         targetDist: 2.65,
         camTarget: [0, 0, 0],
-        // 5 Live Math & Visual Sliders
+        // 6 Live Math & Visual Sliders
         morph: 0.0,             // Slider 1: Morph / 4D W-Slice (-2.0 to 2.0)
         scalePower: 8.0,        // Slider 2: Scale / Power (equation-dependent)
         maxIter: 6,             // Slider 3: Iteration Depth (3 to 14)
         metallicPolish: 1.5,    // Slider 4: Surface Polish / Metallic (0.1 to 3.0)
-        aoContrast: 1.8         // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
+        aoContrast: 1.8,        // Slider 5: Crevice Shadow / AO (0.5 to 3.5)
+        glowIntensity: 1.0      // Slider 6: Volumetric Glow (0.0 to 2.5)
       };
 
       // 5 Equation Presets with Deep-Zoom limits & Scale/Power configs
@@ -1650,6 +1682,7 @@
       const uScalePowerLocation     = gl.getUniformLocation(prog, 'u_scalePower');
       const uMetallicPolishLocation = gl.getUniformLocation(prog, 'u_metallicPolish');
       const uAoContrastLocation     = gl.getUniformLocation(prog, 'u_aoContrast');
+      const uGlowIntensityLocation  = gl.getUniformLocation(prog, 'u_glowIntensity');
       const uPrevTexLocation        = gl.getUniformLocation(prog, 'u_prevTex');
       const uSampleIndexLocation    = gl.getUniformLocation(prog, 'u_sampleIndex');
       const uJitterLocation         = gl.getUniformLocation(prog, 'u_jitter');
@@ -2048,14 +2081,17 @@
       const sliderIter      = document.getElementById('slider-iter');
       const sliderPolish    = document.getElementById('slider-polish');
       const sliderShadow    = document.getElementById('slider-shadow');
+      const sliderGlow      = document.getElementById('slider-glow');
 
       const valMorphEl      = document.getElementById('val-morph');
       const valScaleEl      = document.getElementById('val-scale');
       const valIterEl       = document.getElementById('val-iter');
       const valPolishEl     = document.getElementById('val-polish');
       const valShadowEl     = document.getElementById('val-shadow');
+      const valGlowEl       = document.getElementById('val-glow');
 
       const eqSelect        = document.getElementById('eq-select');
+      const paletteSelect   = document.getElementById('palette-select');
       const tuningPanelEl   = document.getElementById('tuning-panel');
       const btnToggleTuning = document.getElementById('btn-toggle-tuning');
       const btnResetSliders = document.getElementById('btn-reset-sliders');
@@ -2237,9 +2273,19 @@
         });
       }
 
+      // Slider 6: Volumetric Atmospheric Glow (0.0 to 2.5)
+      if (sliderGlow) {
+        sliderGlow.addEventListener('input', (e) => {
+          state.glowIntensity = parseFloat(e.target.value);
+          sampleCount = 0;
+          if (valGlowEl) valGlowEl.textContent = `${state.glowIntensity.toFixed(2)}x`;
+          resetIdleTimer();
+        });
+      }
+
       // Prevent slider touches from causing camera orbit/pinch
       const stopSliderProp = (e) => e.stopPropagation();
-      [sliderRes, btnGovMode, sliderMorph, sliderScale, sliderIter, sliderPolish, sliderShadow, tuningPanelEl, eqSelect, btnFidelity].forEach(el => {
+      [sliderRes, btnGovMode, sliderMorph, sliderScale, sliderIter, sliderPolish, sliderShadow, sliderGlow, tuningPanelEl, eqSelect, paletteSelect, btnFidelity].forEach(el => {
         if (!el) return;
         el.addEventListener('pointerdown', stopSliderProp, { passive: true });
         el.addEventListener('pointermove', stopSliderProp, { passive: true });
@@ -2266,6 +2312,7 @@
           state.maxIter = 6;
           state.metallicPolish = 1.5;
           state.aoContrast = 1.8;
+          state.glowIntensity = 1.0;
           state.manualResolution = false;
           state.resolutionScale = 1.0;
           sampleCount = 0;
@@ -2273,10 +2320,12 @@
           if (sliderIter) sliderIter.value = 6;
           if (sliderPolish) sliderPolish.value = 1.5;
           if (sliderShadow) sliderShadow.value = 1.8;
+          if (sliderGlow) sliderGlow.value = 1.0;
 
           if (valIterEl) valIterEl.textContent = '6 iter';
           if (valPolishEl) valPolishEl.textContent = '1.5x';
           if (valShadowEl) valShadowEl.textContent = '1.8x';
+          if (valGlowEl) valGlowEl.textContent = '1.00x';
 
           updateMorphSliderUI();
           updateScaleSliderUI();
@@ -2299,12 +2348,15 @@
 
           state.metallicPolish = parseFloat((0.5 + Math.random() * 2.2).toFixed(1));
           state.aoContrast = parseFloat((1.0 + Math.random() * 2.0).toFixed(1));
+          state.glowIntensity = parseFloat((0.4 + Math.random() * 1.6).toFixed(2));
           sampleCount = 0;
 
           if (sliderPolish) sliderPolish.value = state.metallicPolish;
           if (sliderShadow) sliderShadow.value = state.aoContrast;
+          if (sliderGlow) sliderGlow.value = state.glowIntensity;
           if (valPolishEl) valPolishEl.textContent = `${state.metallicPolish.toFixed(1)}x`;
           if (valShadowEl) valShadowEl.textContent = `${state.aoContrast.toFixed(1)}x`;
+          if (valGlowEl) valGlowEl.textContent = `${state.glowIntensity.toFixed(2)}x`;
 
           updateMorphSliderUI();
           updateScaleSliderUI();
@@ -2312,7 +2364,7 @@
         });
       }
 
-      // Dropdown Equation Switcher (5 Equations)
+      // Dropdown Equation Switcher (9 Equations)
       if (eqSelect) {
         eqSelect.addEventListener('change', (e) => {
           const eq = parseInt(e.target.value, 10);
@@ -2320,15 +2372,30 @@
         });
       }
 
-      // Palette Chips
+      // Palette Selector & Chips Synchronization
       const palBtns = document.querySelectorAll('[data-palette]');
+
+      function switchPalette(pal) {
+        state.palette = pal;
+        if (paletteSelect) paletteSelect.value = pal;
+        palBtns.forEach(btn => {
+          btn.classList.toggle('active', parseInt(btn.dataset.palette, 10) === pal);
+        });
+        sampleCount = 0;
+        resetIdleTimer();
+      }
+
+      if (paletteSelect) {
+        paletteSelect.addEventListener('change', (e) => {
+          const pal = parseInt(e.target.value, 10);
+          switchPalette(pal);
+        });
+      }
+
       palBtns.forEach(btn => {
         btn.addEventListener('click', () => {
           const pal = parseInt(btn.dataset.palette, 10);
-          state.palette = pal;
-          sampleCount = 0;
-          palBtns.forEach(b => b.classList.toggle('active', b === btn));
-          resetIdleTimer();
+          switchPalette(pal);
         });
       });
 
@@ -2352,6 +2419,9 @@
       updateMorphSliderUI();
       updateResolutionSliderUI();
       updateFidelityUI();
+      if (paletteSelect) paletteSelect.value = state.palette;
+      if (sliderGlow) sliderGlow.value = state.glowIntensity;
+      if (valGlowEl) valGlowEl.textContent = `${state.glowIntensity.toFixed(2)}x`;
 
       // Render Loop
       const startTime = performance.now();
@@ -2438,6 +2508,7 @@
         gl.uniform1f(uScalePowerLocation, state.scalePower);
         gl.uniform1f(uMetallicPolishLocation, state.metallicPolish);
         gl.uniform1f(uAoContrastLocation, state.aoContrast);
+        gl.uniform1f(uGlowIntensityLocation, state.glowIntensity);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
